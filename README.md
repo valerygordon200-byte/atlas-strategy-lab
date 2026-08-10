@@ -125,3 +125,26 @@ campaigns (`fx_campaign_round2.py`, `fx_strict_battery.py`):
   bootstrap P(mean≤0)=0.001, robust across the cost ladder and outlier trim.
 - All corrected numbers are in `reports/fx_round2_*.csv/md`,
   `reports/fx_strict_battery.*`, and `strategy_catalog.json`.
+
+## 2026-08-10 further steps — vintage audit + roll check (read this)
+
+Two decisive follow-ups were run on the two remaining candidates. Full detail:
+`reports/FURTHER_STEPS.md` (reproducible: `scripts/vintage_audit.py`).
+
+**1. Vintage audit — PASSES (USDJPY news drift).** 27 of 28 sampled events
+match the documented as-published prints, including the four most
+revision-prone releases in the store: NFP Mar-2020 (−701K, later −870K),
+NFP Apr-2020 (−20.5M, later −22.1M), NFP Apr-2021 (+266K), CPI May-2022
+(+8.6%), plus all 21 US GDP advance estimates and EIA crude April-2020 weeks
+(store holds +8.99M/+4.59M vs today's revised +10.14M/+6.31M — proof it is
+NOT the current vintage). The drift's actuals are as-published. The drift
+remains 4/6 gates: a real 2022+ regime edge, absent 2016–21.
+
+**2. Hogs August SHORT — KILLED (roll artifact).** The full seasonal program
+collapsed under the roll-convention check. Raw continuous August: −13.9%
+(t=−8.08). Excluding the contract-roll gap (not a tradeable move): +0.05%
+(t=0.05). Mechanism confirmed: August is the most backwardated hog roll month
+(mean −10% gap; spring-farrowed hogs reach slaughter weight Aug–Oct → cash
+prices fall → deferred contracts discount the front). Same test kills Hogs
+Apr/Dec, Gasoline Sep, Corn Jul, Live/Feeder Cattle May. **The seasonal
+catalog is void — do not trade it.**
