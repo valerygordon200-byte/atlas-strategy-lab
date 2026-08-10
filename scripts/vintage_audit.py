@@ -82,7 +82,8 @@ def main():
         print("\nEIA comparison skipped (CSV not present)")
         return
 
-    eia["date"] = pd.to_datetime(eia["date"], format="%Y-%m-%d", errors="coerce")
+    eia["date"] = pd.to_datetime(eia["date"].str.replace("/", "-", regex=False),
+                               format="%Y-%m-%d", errors="coerce")
     eia = eia.dropna().sort_values("date").drop_duplicates("date")
     eia["change_M"] = eia["stocks_kb"].diff() / 1000.0
 
