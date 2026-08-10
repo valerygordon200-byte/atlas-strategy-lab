@@ -1,8 +1,9 @@
 # Paper-Trading Playbook — strategies worth forward-testing
 
 Status: written after the full strict-testing programme (~1,300 strategies tested,
-all kills documented in reports/). Exactly TWO strategies are worth paper trading.
-Everything else in the programme is confirmed dead or below costs.
+all kills documented in reports/). Exactly ONE strategy is currently paper-traded:
+the USDJPY news drift. Dual momentum was KILLED by operator decision on 2026-08-10
+(trade frequency too low). Everything else is confirmed dead or below costs.
 
 Inventory, one line each:
 - Seasonal commodities (312-cell clean test): DEAD — below costs, 0/28 significant.
@@ -11,17 +12,25 @@ Inventory, one line each:
 - Witching / LETF decay / window dressing / Russell / TIPS-gold: DEAD (Campaign-30).
 - Dollar-basket under-reaction (Family E): DEAD at Stage 1 — surprise has no predictive power.
 - D1 next-day news drift, basket pairs: DEAD (walk-forward permutation fails).
-- **Dual momentum (Antonacci): the programme's ONE full PASS — paper trade.**
-- **USDJPY D1 news drift: 4/6 strict gates, on probation — paper trade as a forward test.**
+- **Dual momentum (Antonacci): the programme's ONE full PASS, but KILLED for
+  paper trading by operator decision (2026-08-10) — only 1-2 trades/year. Stats
+  kept below for the record.**
+- **USDJPY D1 news drift: 4/6 strict gates, on probation — THE paper-traded strategy.**
 
 ---
 
-## Strategy 1 — Dual momentum (the one full PASS)
+## (Retired) Dual momentum — the programme's one full PASS
 
-**Verdict:** only strategy in the programme to pass all six strict gates + the full
-robustness battery (cost ladder 0x/2x/5x, both holdout halves, sub-periods). The
-null-signal control (random ranking) FAILS, proving the momentum ranking itself is
-the edge, not the machinery. Buy-and-hold SPY and IEF fail the same gates.
+**Status: KILLED for paper trading on 2026-08-10 by operator decision.** The strategy
+is sound by the programme's tests (the only full PASS), but it produces only ~1-2
+trades per year, which the operator judged too few to be worth forward-testing.
+Kept here as the permanent record of its tested stats.
+
+**Verdict (at the time):** only strategy in the programme to pass all six strict
+gates + the full robustness battery (cost ladder 0x/2x/5x, both holdout halves,
+sub-periods). The null-signal control (random ranking) FAILS, proving the momentum
+ranking itself is the edge, not the machinery. Buy-and-hold SPY and IEF fail the
+same gates.
 
 **Why it works (honest mechanism):**
 - Momentum is the most robust documented anomaly in finance (Jegadeesh & Titman 1993;
@@ -69,7 +78,7 @@ why it is paper-traded on a fractional-capable venue, not live CFDs.
 
 ---
 
-## Strategy 2 — USDJPY D1 news under-reaction drift (on probation)
+## Strategy 1 — USDJPY D1 news under-reaction drift (the paper-traded strategy)
 
 **Verdict:** 4/6 strict gates. Passes every OUT-OF-SAMPLE gate: holdout t=+3.78
 (p=0.001), walk-forward permutation p=0.012, bootstrap P(<=0)=0.002, outlier-trim
@@ -128,9 +137,18 @@ uses information (survey consensus) that no price-only strategy can access.
 
 ---
 
-## Standing rules for both
+## Standing rules
 
 - Edge decays. Re-run the selection/battery annually with the window rolled forward.
 - Paper ledger must include costs (spread + financing) or the test is meaningless.
-- A correct kill is a success. Both strategies have pre-registered kill gates above;
-  if they fail, say so plainly and stop.
+- A correct kill is a success. The strategy has pre-registered kill gates above;
+  if it fails, say so plainly and stop.
+
+## Upcoming-event calendar (step 1 reference)
+
+Snapshot taken 2026-08-10 from market-data/events/events.parquet (Forex Factory
+archive, kept fresh by the pipeline). Full USD High/Medium list through 2026-08-31:
+reports/upcoming_events_2026-08-10.csv. Highlights: CPI cluster Wed Aug 12 08:30
+ET (the next big print), PPI + Jobless Claims Thu Aug 13, Retail Sales + Michigan
+Prel Fri Aug 14, FOMC Minutes Wed Aug 19, GDP/PCE Wed Aug 26, NFP Annual Revision
+Fri Aug 28 (High).
