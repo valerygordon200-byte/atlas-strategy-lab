@@ -70,9 +70,11 @@ def load_events():
     for title, g in ev.groupby("title"):
         g = g.sort_values("date_utc")
         s = g["surprise"]
-        mu = s.expanding().mean().shift(1)
-        sd = s.expanding().std().shift(1)
-        ev.loc[g.index, "z"] = (s - mu) / sd.replace(0, np.nan)
+        mu = s.expanding(min_periods=20).mean().shift(1)
+        sd = s.expanding(min_periods=20).std().shift(1)
+        # floor sd: near-constant series (sd < 1e-12) yield exploding z -> exclude
+        z = (s - mu) / sd.where(sd > 1e-12)
+        ev.loc[g.index, "z"] = z.clip(-8, 8)
     ev["date"] = ev["date_utc"].dt.date
     return ev
 
@@ -146,21 +148,24 @@ def build_basket(events, thr, hor, tier):
     ev = events[(events["z"].abs() >= thr)]
     if tier == "H":
         ev = ev[ev["impact"] == "High"]
-    nets, poss, rs = [], [], []
+    nets, poss, rs = {}, {}, {}
     for pair in CORE5:
         ev2 = ev.copy()
         ev2["r"] = hday_ret(pair, ev2["date"], hor)
-        ev2 = ev2.dropna(subset=["r"])
+        ev2 = ev2.dropna(subset=["r"]).set_index("date")
         cost = cost_units(pair)
-        nets.append(CONV[pair] * np.sign(ev2["z"]) * ev2["r"] - cost)
-        poss.append(CONV[pair] * np.sign(ev2["z"]))
-        rs.append(ev2["r"])
+        nets[pair] = CONV[pair] * np.sign(ev2["z"]) * ev2["r"] - cost
+        poss[pair] = CONV[pair] * np.sign(ev2["z"])
+        rs[pair] = ev2["r"]
+    netdf = pd.DataFrame(nets)
+    posdf = pd.DataFrame(poss)
+    rdf = pd.DataFrame(rs)
     out = pd.DataFrame({
-        "date": ev["date"].values,
-        "net": pd.concat(nets, axis=1).mean(axis=1).to_numpy(),
-        "pos": pd.concat(poss, axis=1).mean(axis=1).to_numpy(),
-        "r": pd.concat(rs, axis=1).mean(axis=1).to_numpy(),
-    })
+        "date": netdf.index,
+        "net": netdf.mean(axis=1).to_numpy(),
+        "pos": posdf.mean(axis=1).to_numpy(),
+        "r": rdf.mean(axis=1).to_numpy(),
+    }).dropna()
     return out
 
 
@@ -260,6 +265,8 @@ def build_streak(events, thr, hor, tier):
 
 def build_title(events, title, hor):
     ev = events[events["title"] == title].copy()
+    if not len(ev):
+        return pd.DataFrame(columns=["date", "z", "r", "net", "pos", "pair"])
     dfs = []
     for pair in CORE5:
         ev2 = ev.copy()
@@ -273,6 +280,8 @@ def build_title(events, title, hor):
         ev2["pos"] = pos
         ev2["pair"] = pair
         dfs.append(ev2[["date", "z", "r", "net", "pos", "pair"]])
+    if not dfs:
+        return pd.DataFrame(columns=["date", "z", "r", "net", "pos", "pair"])
     return pd.concat(dfs)
 
 
@@ -346,12 +355,9 @@ def trimmed_by_year(s: pd.Series) -> float:
 def perm_signflip(actual, r, pos, cost, n_perm=N_PERM):
     r = np.asarray(r, dtype=float)
     pos = np.asarray(pos, dtype=float)
-    cnt = 1
-    for _ in range(n_perm):
-        flips = RNG.choice([-1.0, 1.0], len(r))
-        if (pos * flips * r - cost).mean() >= actual:
-            cnt += 1
-    return cnt / (n_perm + 1)
+    flips = RNG.choice([-1.0, 1.0], size=(n_perm, len(r)))
+    nets = (pos * flips * r - cost).mean(axis=1)
+    return (int((nets >= actual).sum()) + 1) / (n_perm + 1)
 
 
 def perm_randday(actual, r_arr, k, n_perm=N_PERM):
@@ -380,23 +386,41 @@ def wf_gate(ev: pd.DataFrame) -> pd.Series:
 
 
 def wf_perm_randday(actual_mean, ev, daily_ret_pool, n_perm=N_PERM):
+    """Random-day null through the SAME walk-forward machinery, fully
+    vectorised: sample per-year event means for all perms at once, apply the
+    trailing-profitability gate along the year axis."""
     ev = ev.copy()
     ev["year"] = pd.to_datetime(ev["date"]).dt.year
-    years = sorted(ev["year"].unique())
-    k_by_year = {y: int((ev["year"] == y).sum()) for y in years}
-    cnt = 1
-    for _ in range(n_perm):
-        frames = []
-        for y in years:
-            k = k_by_year[y]
-            if k == 0:
-                continue
-            frames.append(pd.DataFrame({"year": y,
-                                        "net": RNG.choice(daily_ret_pool, k, replace=True)}))
-        wf = wf_gate(pd.concat(frames))
-        if len(wf) and wf.mean() >= actual_mean:
-            cnt += 1
-    return cnt / (n_perm + 1)
+    ycounts = ev["year"].value_counts().sort_index()
+    k = ycounts.to_numpy()
+    ny = len(ycounts)
+    pool = np.asarray(daily_ret_pool, dtype=float)
+    n = len(pool)
+    max_k = int(k.max())
+    idx = RNG.integers(0, n, size=(n_perm, ny, max_k))
+    vals = pool[idx]
+    msk = np.arange(max_k)[None, None, :] < k[None, :, None]
+    vals = np.where(msk, vals, np.nan)
+    year_means = np.nanmean(vals, axis=2)               # (n_perm, ny)
+    year_means = np.where(np.isnan(year_means), 0.0, year_means)
+    # valid years: trailing 3y event count >= WF_MIN_EVENTS (fixed per year)
+    valid = np.zeros(ny, bool)
+    for i in range(ny):
+        lo = max(0, i - WF_TRAIL_YEARS)
+        valid[i] = k[lo:i].sum() >= WF_MIN_EVENTS
+    kf = k.astype(float)
+    out = np.full((n_perm, ny), np.nan)
+    for i in range(1, ny):
+        if not valid[i]:
+            continue
+        lo = max(0, i - WF_TRAIL_YEARS)
+        kk = k[lo:i].sum()
+        wm = np.nansum(year_means[:, lo:i] * kf[None, lo:i], axis=1) / kk
+        trade = wm > 0
+        out[:, i] = np.where(trade, year_means[:, i], 0.0)
+    null_means = np.nanmean(out, axis=1)
+    cnt = int((null_means >= actual_mean).sum())
+    return (cnt + 1) / (n_perm + 1)
 
 
 def bootstrap_p(series: pd.Series, n: int = N_BOOT) -> dict:
@@ -511,39 +535,46 @@ def main():
     print(f"basket done: {count} tested", flush=True)
 
     # ---- size-|z| ----
-    for pair in CORE5:
-        for thr in (0.5, 1.0):
-            for tier in TIERS:
-                ev = build_size_z(events, thr, 1, tier)
+    for thr in (0.5, 1.0):
+        for tier in TIERS:
+            ev_all = build_size_z(events, thr, 1, tier)
+            for pair in CORE5:
+                ev = ev_all[ev_all["pair"] == pair] if "pair" in ev_all.columns else ev_all
                 run(f"sizez_{pair}_{thr}_{tier}", f"size|z| {pair} thr={thr} tier={tier}",
                     ev, pair, "randday")
     print(f"sizez done: {count} tested", flush=True)
 
     # ---- vol-managed ----
-    for pair in CORE5:
-        for tier in TIERS:
-            ev = build_volman(events, 0.5, 1, tier)
+    for tier in TIERS:
+        ev_all = build_volman(events, 0.5, 1, tier)
+        for pair in CORE5:
+            ev = ev_all[ev_all["pair"] == pair] if "pair" in ev_all.columns else ev_all
             run(f"volman_{pair}_{tier}", f"vol-managed {pair} tier={tier}", ev, pair, "randday")
     print(f"volman done: {count} tested", flush=True)
 
     # ---- over-reaction fade ----
-    for pair in CORE5:
-        for tier in TIERS:
-            ev = build_overfade(events, 1.0, 1, tier)
-            if len(ev):
-                run(f"overfade_{pair}_{tier}", f"over-fade {pair} tier={tier}", ev, pair, "signflip")
+    for tier in TIERS:
+        ev_all = build_overfade(events, 1.0, 1, tier)
+        if "pair" in ev_all.columns:
+            for pair in CORE5:
+                ev = ev_all[ev_all["pair"] == pair]
+                if len(ev):
+                    run(f"overfade_{pair}_{tier}", f"over-fade {pair} tier={tier}", ev, pair, "signflip")
     print(f"overfade done: {count} tested", flush=True)
 
     # ---- streak ----
-    for pair in CORE5:
-        for tier in TIERS:
-            ev = build_streak(events, 0.5, 1, tier)
-            if len(ev):
-                run(f"streak_{pair}_{tier}", f"streak {pair} tier={tier}", ev, pair, "signflip")
+    for tier in TIERS:
+        ev_all = build_streak(events, 0.5, 1, tier)
+        if "pair" in ev_all.columns:
+            for pair in CORE5:
+                ev = ev_all[ev_all["pair"] == pair]
+                if len(ev):
+                    run(f"streak_{pair}_{tier}", f"streak {pair} tier={tier}", ev, pair, "signflip")
     print(f"streak done: {count} tested", flush=True)
 
     # ---- per-title ----
-    for title in ["Non Farm Payrolls", "CPI", "Fed Funds Rate", "Initial Jobless Claims"]:
+    for title in ["Non Farm Payrolls", "CPI", "Fed Interest Rate Decision",
+                  "Initial Jobless Claims", "Inflation Rate YoY", "GDP Growth Rate QoQ Adv"]:
         ev = build_title(events, title, 1)
         if len(ev):
             key = f"title_{title.replace(' ', '_')}"

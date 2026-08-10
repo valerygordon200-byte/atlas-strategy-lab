@@ -104,3 +104,24 @@ Data layout expected: `market-data/normalized/<PAIR>/<PAIR>_d1.parquet` (FX),
   permutations, roll-convention checks, vintage audits.
 - The master question, applied to every result: *"What would this number look
   like if the signal contributed nothing?"* — computed explicitly, every time.
+
+## 2026-08-10 correction — z-score sd-underflow bug (important)
+
+A bug was found and fixed in the expanding per-title z-score used by the FX
+campaigns (`fx_campaign_round2.py`, `fx_strict_battery.py`):
+
+- **Bug**: `expanding().std()` on near-constant surprise series (e.g. titles
+  that usually print exactly the forecast) underflows to ~1e-16, making
+  `z = (surprise - mean)/sd` explode to ±1e15. The `|z| >= 0.5` "big surprise"
+  filter then passed noise events, and the sign for those events was random.
+- **Fix**: `min_periods=20`, sd floored at 1e-12 (near-constant series →
+  NaN → excluded), and z winsorized at ±8.
+- **Impact**: the previous full six-gate PASS (`streak_USDJPY_HM`, 6/6) was an
+  artifact of this bug — **it no longer passes** (4/6). Corrected totals:
+  **0/403 round-2 tests full-PASS, 0/7 battery candidates PASS.**
+- **What survives**: the **USDJPY news under-reaction drift** remains the
+  strongest candidate — 4/6 gates, failing only the two in-sample gates (the
+  effect genuinely emerges post-2021): holdout NW t=+3.03, walk-forward p=0.012,
+  bootstrap P(mean≤0)=0.001, robust across the cost ladder and outlier trim.
+- All corrected numbers are in `reports/fx_round2_*.csv/md`,
+  `reports/fx_strict_battery.*`, and `strategy_catalog.json`.

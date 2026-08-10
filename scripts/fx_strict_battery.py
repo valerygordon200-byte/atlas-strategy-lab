@@ -75,10 +75,10 @@ def load_big_events() -> pd.DataFrame:
     for title, g in ev.groupby("title"):
         g = g.sort_values("date_utc")
         s = g["surprise"]
-        mu = s.expanding().mean().shift(1)
-        sd = s.expanding().std().shift(1)
-        z = (s - mu) / sd.replace(0, np.nan)
-        ev.loc[g.index, "z"] = z
+        mu = s.expanding(min_periods=20).mean().shift(1)
+        sd = s.expanding(min_periods=20).std().shift(1)
+        z = (s - mu) / sd.where(sd > 1e-12)
+        ev.loc[g.index, "z"] = z.clip(-8, 8)
     ev = ev[ev["z"].abs() >= Z_THR].copy()
     ev["date"] = ev["date_utc"].dt.date
     return ev
