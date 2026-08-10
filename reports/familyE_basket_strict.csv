@@ -1,0 +1,5 @@
+variant,n,mean_net,is_t,p_is,oos_mean,oos_t,wf_mean,p_wf,boot,trim,VERDICT,gates
+h4h_momentum,178,0.0315,2.36,0.016,0.0059,0.27,0.0222,0.5674,0.0878,0.8951,FAIL,S1; S2; S4; boot
+h8h_momentum,178,0.005,0.64,0.2717,-0.0155,-0.52,-0.005,0.6733,0.5828,0.0301,FAIL,S1; S2; S3; S4; boot
+h24h_momentum,178,0.0453,1.7,0.049,0.0012,0.02,0.0241,0.5524,0.197,1.0215,FAIL,S1; S2; S4; boot
+h48h_momentum,178,0.0141,1.23,0.1079,-0.0853,-1.02,0.0073,0.4525,0.4212,-1.6215,FAIL,S1; S2; S3; S4; boot; trim
