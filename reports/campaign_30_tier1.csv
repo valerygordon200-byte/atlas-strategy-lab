@@ -1,0 +1,7 @@
+name,n,mean_net,is_t,p_is,oos_t,wf_sh,wf_t,p_wf,VERDICT,gates
+witching_excess_abs,5030,0.0007,0.19,0.4266,1.27,-0.24,-1.06,1.0,FAIL,S1; S2; S3; S4
+letf_TQQQ_SQQQ_LS,4146,-0.0927,-60.95,1.0,-21.49,15.11,60.85,0.5135,FAIL,S1; S2; S4
+letf_SPXL_SPXS_LS,4454,-0.0913,-37.46,1.0,-31.23,11.63,48.54,0.3626,FAIL,S1; S2; S4
+letf_UPRO_SPXU_LS,4305,-0.0953,-59.47,1.0,-24.43,15.24,62.53,0.5155,FAIL,S1; S2; S4
+window_dressing_w4_l4,57,0.0795,-0.23,0.5954,0.73,-2.65,-1.07,0.001,FAIL,S1; S2; S3
+realyield_gold_control,2509,-0.0897,-2.76,0.997,-3.32,1.33,4.15,0.037,FAIL,S1; S2
