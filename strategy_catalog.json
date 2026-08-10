@@ -1,0 +1,763 @@
+{
+  "version": "2026-08-10",
+  "protocol": "six-gate strict battery",
+  "note": "research only, not trade recommendations",
+  "seasonal_locked": {
+    "CL_2": {
+      "commodity": "CL",
+      "month": 2,
+      "direction": "LONG",
+      "is_mean_pct": 4.79,
+      "is_t": 2.7,
+      "is_n": 14
+    },
+    "NG_9": {
+      "commodity": "NG",
+      "month": 9,
+      "direction": "LONG",
+      "is_mean_pct": 9.52,
+      "is_t": 2.21,
+      "is_n": 15
+    },
+    "RB_3": {
+      "commodity": "RB",
+      "month": 3,
+      "direction": "LONG",
+      "is_mean_pct": 12.46,
+      "is_t": 4.03,
+      "is_n": 14
+    },
+    "RB_9": {
+      "commodity": "RB",
+      "month": 9,
+      "direction": "SHORT",
+      "is_mean_pct": -7.87,
+      "is_t": -2.42,
+      "is_n": 14
+    },
+    "ZC_2": {
+      "commodity": "ZC",
+      "month": 2,
+      "direction": "LONG",
+      "is_mean_pct": 2.93,
+      "is_t": 2.09,
+      "is_n": 14
+    },
+    "ZC_12": {
+      "commodity": "ZC",
+      "month": 12,
+      "direction": "LONG",
+      "is_mean_pct": 5.93,
+      "is_t": 3.15,
+      "is_n": 15
+    },
+    "ZW_7": {
+      "commodity": "ZW",
+      "month": 7,
+      "direction": "LONG",
+      "is_mean_pct": 7.35,
+      "is_t": 2.39,
+      "is_n": 14
+    },
+    "ZS_2": {
+      "commodity": "ZS",
+      "month": 2,
+      "direction": "LONG",
+      "is_mean_pct": 4.74,
+      "is_t": 2.1,
+      "is_n": 14
+    },
+    "ZS_4": {
+      "commodity": "ZS",
+      "month": 4,
+      "direction": "LONG",
+      "is_mean_pct": 3.07,
+      "is_t": 2.33,
+      "is_n": 14
+    },
+    "ZS_12": {
+      "commodity": "ZS",
+      "month": 12,
+      "direction": "LONG",
+      "is_mean_pct": 2.7,
+      "is_t": 2.05,
+      "is_n": 15
+    },
+    "ZM_4": {
+      "commodity": "ZM",
+      "month": 4,
+      "direction": "LONG",
+      "is_mean_pct": 3.72,
+      "is_t": 2.08,
+      "is_n": 14
+    },
+    "ZM_9": {
+      "commodity": "ZM",
+      "month": 9,
+      "direction": "SHORT",
+      "is_mean_pct": -10.24,
+      "is_t": -2.87,
+      "is_n": 15
+    },
+    "ZM_10": {
+      "commodity": "ZM",
+      "month": 10,
+      "direction": "LONG",
+      "is_mean_pct": 4.91,
+      "is_t": 2.06,
+      "is_n": 15
+    },
+    "ZL_2": {
+      "commodity": "ZL",
+      "month": 2,
+      "direction": "LONG",
+      "is_mean_pct": 5.64,
+      "is_t": 2.35,
+      "is_n": 14
+    },
+    "ZR_6": {
+      "commodity": "ZR",
+      "month": 6,
+      "direction": "SHORT",
+      "is_mean_pct": -3.82,
+      "is_t": -2.08,
+      "is_n": 15
+    },
+    "SB_3": {
+      "commodity": "SB",
+      "month": 3,
+      "direction": "SHORT",
+      "is_mean_pct": -8.09,
+      "is_t": -2.35,
+      "is_n": 14
+    },
+    "SB_6": {
+      "commodity": "SB",
+      "month": 6,
+      "direction": "LONG",
+      "is_mean_pct": 6.44,
+      "is_t": 2.52,
+      "is_n": 15
+    },
+    "SB_7": {
+      "commodity": "SB",
+      "month": 7,
+      "direction": "LONG",
+      "is_mean_pct": 5.49,
+      "is_t": 2.18,
+      "is_n": 15
+    },
+    "CC_1": {
+      "commodity": "CC",
+      "month": 1,
+      "direction": "LONG",
+      "is_mean_pct": 6.02,
+      "is_t": 2.43,
+      "is_n": 14
+    },
+    "CC_6": {
+      "commodity": "CC",
+      "month": 6,
+      "direction": "LONG",
+      "is_mean_pct": 3.71,
+      "is_t": 2.03,
+      "is_n": 15
+    },
+    "CC_10": {
+      "commodity": "CC",
+      "month": 10,
+      "direction": "SHORT",
+      "is_mean_pct": -4.96,
+      "is_t": -2.6,
+      "is_n": 15
+    },
+    "CT_12": {
+      "commodity": "CT",
+      "month": 12,
+      "direction": "LONG",
+      "is_mean_pct": 5.2,
+      "is_t": 2.75,
+      "is_n": 15
+    },
+    "LE_5": {
+      "commodity": "LE",
+      "month": 5,
+      "direction": "SHORT",
+      "is_mean_pct": -3.58,
+      "is_t": -2.45,
+      "is_n": 14
+    },
+    "LE_9": {
+      "commodity": "LE",
+      "month": 9,
+      "direction": "LONG",
+      "is_mean_pct": 2.17,
+      "is_t": 2.03,
+      "is_n": 14
+    },
+    "GF_4": {
+      "commodity": "GF",
+      "month": 4,
+      "direction": "LONG",
+      "is_mean_pct": 2.01,
+      "is_t": 2.21,
+      "is_n": 13
+    },
+    "GF_5": {
+      "commodity": "GF",
+      "month": 5,
+      "direction": "LONG",
+      "is_mean_pct": 3.47,
+      "is_t": 2.68,
+      "is_n": 14
+    },
+    "HE_2": {
+      "commodity": "HE",
+      "month": 2,
+      "direction": "LONG",
+      "is_mean_pct": 4.91,
+      "is_t": 2.79,
+      "is_n": 14
+    },
+    "HE_4": {
+      "commodity": "HE",
+      "month": 4,
+      "direction": "LONG",
+      "is_mean_pct": 7.46,
+      "is_t": 2.44,
+      "is_n": 14
+    },
+    "HE_8": {
+      "commodity": "HE",
+      "month": 8,
+      "direction": "SHORT",
+      "is_mean_pct": -14.57,
+      "is_t": -4.33,
+      "is_n": 14
+    },
+    "HE_10": {
+      "commodity": "HE",
+      "month": 10,
+      "direction": "SHORT",
+      "is_mean_pct": -6.02,
+      "is_t": -2.29,
+      "is_n": 14
+    },
+    "GC_11": {
+      "commodity": "GC",
+      "month": 11,
+      "direction": "LONG",
+      "is_mean_pct": 2.86,
+      "is_t": 2.13,
+      "is_n": 15
+    },
+    "SI_6": {
+      "commodity": "SI",
+      "month": 6,
+      "direction": "SHORT",
+      "is_mean_pct": -4.18,
+      "is_t": -2.15,
+      "is_n": 14
+    },
+    "PL_1": {
+      "commodity": "PL",
+      "month": 1,
+      "direction": "LONG",
+      "is_mean_pct": 4.16,
+      "is_t": 2.89,
+      "is_n": 14
+    },
+    "LB_9": {
+      "commodity": "LB",
+      "month": 9,
+      "direction": "SHORT",
+      "is_mean_pct": -7.09,
+      "is_t": -2.45,
+      "is_n": 15
+    },
+    "LB_11": {
+      "commodity": "LB",
+      "month": 11,
+      "direction": "LONG",
+      "is_mean_pct": 6.13,
+      "is_t": 3.04,
+      "is_n": 15
+    }
+  },
+  "seasonal_strict_battery": [
+    {
+      "key": "HE_8-8",
+      "label": "Hogs August SHORT",
+      "is_t": 3.510595632138987,
+      "p_is": 0.0009990009990009,
+      "ho_t": 5.6222148588766805,
+      "p_ho": 0.0009990009990009,
+      "wf_mean": 0.138150914102366,
+      "p_wf": 0.0759240759240759,
+      "p_leq_0": 0.0,
+      "VERDICT": "FAIL",
+      "gates": "wf mean>0 & p_wf<0.05"
+    },
+    {
+      "key": "HE_4-4",
+      "label": "Hogs April LONG",
+      "is_t": 1.542349425409154,
+      "p_is": 0.0019980019980019,
+      "ho_t": 3.2395726219895984,
+      "p_ho": 0.0049950049950049,
+      "wf_mean": 0.0412844346887971,
+      "p_wf": 0.1628371628371628,
+      "p_leq_0": 0.0062,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; wf mean>0 & p_wf<0.05"
+    },
+    {
+      "key": "NG_12-2",
+      "label": "NatGas Dec-Feb (winter)",
+      "is_t": -0.3179882442009776,
+      "p_is": 0.1888111888111888,
+      "ho_t": 2.3247744371361123,
+      "p_ho": 0.0009990009990009,
+      "wf_mean": 0.0547212900288179,
+      "p_wf": 0.2397602397602397,
+      "p_leq_0": 0.2382,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "HE_12-12",
+      "label": "Hogs December LONG",
+      "is_t": -0.1259390501036717,
+      "p_is": 0.2027972027972027,
+      "ho_t": 2.005489737831047,
+      "p_ho": 0.0209790209790209,
+      "wf_mean": 0.0279226492499272,
+      "p_wf": 0.1698301698301698,
+      "p_leq_0": 0.077,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "RB_9-9",
+      "label": "Gasoline September",
+      "is_t": 1.6108443604316398,
+      "p_is": 0.0099900099900099,
+      "ho_t": 1.9827862932511853,
+      "p_ho": 0.0119880119880119,
+      "wf_mean": 0.0467302035419321,
+      "p_wf": 0.0959040959040959,
+      "p_leq_0": 0.0184,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; holdout t>2 & p<0.05; wf mean>0 & p_wf<0.05"
+    },
+    {
+      "key": "ZC_7-7",
+      "label": "Corn July",
+      "is_t": 0.1448048061380644,
+      "p_is": 0.1718281718281718,
+      "ho_t": 1.7646998779744258,
+      "p_ho": 0.0009990009990009,
+      "wf_mean": 0.0346383028057675,
+      "p_wf": 0.0779220779220779,
+      "p_leq_0": 0.1196,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; holdout t>2 & p<0.05; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "NG_12-12",
+      "label": "NatGas December",
+      "is_t": -0.0607233515561665,
+      "p_is": 0.2317682317682317,
+      "ho_t": 1.7244105091039572,
+      "p_ho": 0.0049950049950049,
+      "wf_mean": 0.0648822293289033,
+      "p_wf": 0.1738261738261738,
+      "p_leq_0": 0.0612,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; holdout t>2 & p<0.05; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "ZW_9-9",
+      "label": "Wheat September",
+      "is_t": -0.4101795480482212,
+      "p_is": 0.4085914085914086,
+      "ho_t": 1.6867383137635117,
+      "p_ho": 0.0119880119880119,
+      "wf_mean": -0.0408330522631826,
+      "p_wf": 0.8451548451548452,
+      "p_leq_0": 0.9754,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; holdout t>2 & p<0.05; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05; trimmed wf>0"
+    }
+  ],
+  "fx_strict_battery": [
+    {
+      "key": "news_EURUSD",
+      "label": "News drift EURUSD (z>=|0.5|, next-day open)",
+      "is_t": -0.2231446103607511,
+      "p_is": 0.2807192807192807,
+      "ho_nw": 1.4153754085724546,
+      "p_ho": 0.0099900099900099,
+      "wf_mean": 0.0001002159356897,
+      "p_wf": 0.1098901098901098,
+      "p_leq_0": 0.057,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; holdout NW t>2 & p<0.05; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "news_USDJPY",
+      "label": "News drift USDJPY (z>=|0.5|, next-day open)",
+      "is_t": 1.5984685137085597,
+      "p_is": 0.0119880119880119,
+      "ho_nw": 3.1428852923243107,
+      "p_ho": 0.0009990009990009,
+      "wf_mean": 0.0004316387171898,
+      "p_wf": 0.0029970029970029,
+      "p_leq_0": 0.0,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01"
+    },
+    {
+      "key": "news_GBPUSD",
+      "label": "News drift GBPUSD (z>=|0.5|, next-day open)",
+      "is_t": -0.6706287301382173,
+      "p_is": 0.5034965034965035,
+      "ho_nw": 2.3456032255422605,
+      "p_ho": 0.0009990009990009,
+      "wf_mean": 0.0001470286707688,
+      "p_wf": 0.0679320679320679,
+      "p_leq_0": 0.0728,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "news_AUDUSD",
+      "label": "News drift AUDUSD (z>=|0.5|, next-day open)",
+      "is_t": -1.9658587244773784,
+      "p_is": 0.8001998001998002,
+      "ho_nw": 2.0588197627479734,
+      "p_ho": 0.0029970029970029,
+      "wf_mean": 3.277123536030134e-05,
+      "p_wf": 0.2537462537462537,
+      "p_leq_0": 0.3638,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "news_USDCAD",
+      "label": "News drift USDCAD (z>=|0.5|, next-day open)",
+      "is_t": -1.0158880597030313,
+      "p_is": 0.6363636363636364,
+      "ho_nw": 2.358808223805876,
+      "p_ho": 0.0009990009990009,
+      "wf_mean": 3.831114847602538e-05,
+      "p_wf": 0.3636363636363636,
+      "p_leq_0": 0.1866,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05"
+    },
+    {
+      "key": "rev1_AUDUSD",
+      "label": "1-day reversal AUDUSD",
+      "is_t": -0.8107928056275882,
+      "p_is": 0.4755244755244755,
+      "ho_nw": -3.2927474707717166,
+      "p_ho": 0.993006993006993,
+      "wf_mean": -5.412692204659236e-05,
+      "p_wf": 0.6603396603396603,
+      "p_leq_0": 0.618,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; holdout NW t>2 & p<0.05; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05; trimmed wf>0"
+    },
+    {
+      "key": "rev5_EURGBP",
+      "label": "5-day reversal EURGBP",
+      "is_t": -0.1561809766336132,
+      "p_is": 0.2017982017982018,
+      "ho_nw": 1.2268173331058252,
+      "p_ho": 0.0109890109890109,
+      "wf_mean": -0.00014354509671,
+      "p_wf": 0.8811188811188811,
+      "p_leq_0": 0.8004,
+      "VERDICT": "FAIL",
+      "gates": "|t_is|>2; p_is<0.01; holdout NW t>2 & p<0.05; wf mean>0 & p_wf<0.05; bootstrap P(<=0)<0.05; trimmed wf>0"
+    }
+  ],
+  "fx_campaign_top25": [
+    {
+      "family": "pre_event_drift",
+      "pair": "USDJPY",
+      "is_t": NaN,
+      "oos_mean": NaN,
+      "oos_t": 7.453614682065393,
+      "oos_nw": 7.453614682065393,
+      "win": NaN,
+      "n": 2244,
+      "p": NaN
+    },
+    {
+      "family": "news_drift_USD",
+      "pair": "EURUSD",
+      "is_t": NaN,
+      "oos_mean": 0.0007240023514049,
+      "oos_t": 4.776462139166213,
+      "oos_nw": 3.9099606064114623,
+      "win": 0.5608552631578947,
+      "n": 1216,
+      "p": 0.0009990009990009
+    },
+    {
+      "family": "news_drift_USD",
+      "pair": "USDJPY",
+      "is_t": NaN,
+      "oos_mean": 0.0006998587057135,
+      "oos_t": 3.5919837387847924,
+      "oos_nw": 3.0893259540512594,
+      "win": 0.5411184210526315,
+      "n": 1216,
+      "p": 0.0009990009990009
+    },
+    {
+      "family": "news_drift_USD",
+      "pair": "USDCAD",
+      "is_t": NaN,
+      "oos_mean": 0.0004034772230284,
+      "oos_t": 3.563361468754121,
+      "oos_nw": 2.911184951186248,
+      "win": 0.540296052631579,
+      "n": 1216,
+      "p": 0.0009990009990009
+    },
+    {
+      "family": "news_drift_USD",
+      "pair": "AUDUSD",
+      "is_t": NaN,
+      "oos_mean": 0.0006331885328766,
+      "oos_t": 3.2750100902097605,
+      "oos_nw": 2.730806996557573,
+      "win": 0.522203947368421,
+      "n": 1216,
+      "p": 0.0019980019980019
+    },
+    {
+      "family": "news_drift_USD",
+      "pair": "GBPUSD",
+      "is_t": NaN,
+      "oos_mean": 0.0005174651875761,
+      "oos_t": 3.138932638567353,
+      "oos_nw": 2.651092603971678,
+      "win": 0.5419407894736842,
+      "n": 1216,
+      "p": 0.0019980019980019
+    },
+    {
+      "family": "hour18",
+      "pair": "USDJPY",
+      "is_t": -1.913499052237832,
+      "oos_mean": 0.0001364368893541,
+      "oos_t": 2.8205526206625056,
+      "oos_nw": 2.8205526206625056,
+      "win": 0.572463768115942,
+      "n": 414,
+      "p": NaN
+    },
+    {
+      "family": "hour14",
+      "pair": "EURUSD",
+      "is_t": -0.0597842722932125,
+      "oos_mean": 0.0001700247316139,
+      "oos_t": 2.587483560860607,
+      "oos_nw": 2.587483560860607,
+      "win": 0.5242718446601942,
+      "n": 412,
+      "p": NaN
+    },
+    {
+      "family": "month10",
+      "pair": "USDJPY",
+      "is_t": 1.1776857463112076,
+      "oos_mean": 0.0001192904006653,
+      "oos_t": 2.5333498845474205,
+      "oos_nw": 2.262109738698079,
+      "win": 0.0494551550712489,
+      "n": 1193,
+      "p": 0.6113886113886113
+    },
+    {
+      "family": "month10",
+      "pair": "EURJPY",
+      "is_t": 0.0242278020221221,
+      "oos_mean": 9.97322648449778e-05,
+      "oos_t": 2.335523378173215,
+      "oos_nw": 2.263357527824711,
+      "win": 0.0452640402347024,
+      "n": 1193,
+      "p": 0.6363636363636364
+    },
+    {
+      "family": "hour14",
+      "pair": "GBPUSD",
+      "is_t": -0.9797370316999277,
+      "oos_mean": 0.0001490383392048,
+      "oos_t": 2.257236165971717,
+      "oos_nw": 2.257236165971717,
+      "win": 0.5509708737864077,
+      "n": 412,
+      "p": NaN
+    },
+    {
+      "family": "hour02",
+      "pair": "EURUSD",
+      "is_t": 0.7239076343129625,
+      "oos_mean": 6.298789933016154e-05,
+      "oos_t": 2.2255918074004497,
+      "oos_nw": 2.2255918074004497,
+      "win": 0.4891041162227603,
+      "n": 413,
+      "p": NaN
+    },
+    {
+      "family": "month06",
+      "pair": "EURJPY",
+      "is_t": 0.8489246859593934,
+      "oos_mean": 9.976100781555046e-05,
+      "oos_t": 2.2199907493993054,
+      "oos_nw": 2.0099257121753418,
+      "win": 0.055322715842414,
+      "n": 1193,
+      "p": 0.6653346653346653
+    },
+    {
+      "family": "month06",
+      "pair": "USDJPY",
+      "is_t": 0.8846713214922403,
+      "oos_mean": 0.0001006247661322,
+      "oos_t": 2.2122977551870053,
+      "oos_nw": 2.3281947538625847,
+      "win": 0.0561609388097233,
+      "n": 1193,
+      "p": 0.6373626373626373
+    },
+    {
+      "family": "gap_fade",
+      "pair": "AUDUSD",
+      "is_t": -0.5862281511130916,
+      "oos_mean": 0.0004034599917263,
+      "oos_t": 2.108470650550441,
+      "oos_nw": 2.1538897036676428,
+      "win": 0.5272422464375524,
+      "n": 1193,
+      "p": 0.0049950049950049
+    },
+    {
+      "family": "rev1",
+      "pair": "AUDUSD",
+      "is_t": -0.5862281511130916,
+      "oos_mean": 0.0004034599917263,
+      "oos_t": 2.108470650550441,
+      "oos_nw": 2.1538897036676428,
+      "win": 0.5272422464375524,
+      "n": 1193,
+      "p": 0.0049950049950049
+    },
+    {
+      "family": "rev5",
+      "pair": "EURGBP",
+      "is_t": 0.5497913368045528,
+      "oos_mean": 0.0003390946835909,
+      "oos_t": 2.076473475454041,
+      "oos_nw": 1.673695499208973,
+      "win": 0.5188600167644594,
+      "n": 1193,
+      "p": 0.0069930069930069
+    },
+    {
+      "family": "hour23",
+      "pair": "USDJPY",
+      "is_t": 2.341202911793512,
+      "oos_mean": 0.000151682519885,
+      "oos_t": 2.012692343303605,
+      "oos_nw": 2.012692343303605,
+      "win": 0.5567282321899736,
+      "n": 379,
+      "p": NaN
+    },
+    {
+      "family": "ma_bounce63",
+      "pair": "EURGBP",
+      "is_t": 1.7724290830570395,
+      "oos_mean": 5.753390087772443e-05,
+      "oos_t": 1.9943675747413632,
+      "oos_nw": 2.389841306685666,
+      "win": 0.0838222967309304,
+      "n": 1193,
+      "p": 0.2087912087912088
+    },
+    {
+      "family": "hour08",
+      "pair": "EURUSD",
+      "is_t": 0.4243830480748786,
+      "oos_mean": 9.35603092066078e-05,
+      "oos_t": 1.976723391336135,
+      "oos_nw": 1.976723391336135,
+      "win": 0.4769975786924939,
+      "n": 413,
+      "p": NaN
+    },
+    {
+      "family": "month06",
+      "pair": "GBPJPY",
+      "is_t": 0.1041232770506567,
+      "oos_mean": 8.537115595270314e-05,
+      "oos_t": 1.857019492473222,
+      "oos_nw": 1.7063567587451995,
+      "win": 0.055322715842414,
+      "n": 1193,
+      "p": 0.6603396603396603
+    },
+    {
+      "family": "hour09",
+      "pair": "USDJPY",
+      "is_t": 0.3857086065297698,
+      "oos_mean": 9.013389436958815e-05,
+      "oos_t": 1.8514336610543851,
+      "oos_nw": 1.8514336610543851,
+      "win": 0.5776699029126213,
+      "n": 412,
+      "p": NaN
+    },
+    {
+      "family": "hour22",
+      "pair": "EURUSD",
+      "is_t": 1.0610375310430649,
+      "oos_mean": 5.468598973096909e-05,
+      "oos_t": 1.830019778816618,
+      "oos_nw": 1.830019778816618,
+      "win": 0.475,
+      "n": 360,
+      "p": NaN
+    },
+    {
+      "family": "hour19",
+      "pair": "USDJPY",
+      "is_t": 1.2014224144422236,
+      "oos_mean": 6.895615077389556e-05,
+      "oos_t": 1.8141039188189825,
+      "oos_nw": 1.8141039188189825,
+      "win": 0.5700483091787439,
+      "n": 414,
+      "p": NaN
+    },
+    {
+      "family": "month11",
+      "pair": "NZDUSD",
+      "is_t": 0.7399121055292692,
+      "oos_mean": 0.0001107922860858,
+      "oos_t": 1.773823453039793,
+      "oos_nw": 1.9100232096415792,
+      "win": 0.0435875943000838,
+      "n": 1193,
+      "p": 0.4115884115884116
+    }
+  ]
+}

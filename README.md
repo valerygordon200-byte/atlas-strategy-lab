@@ -1,0 +1,106 @@
+# ATLAS Strategy Lab
+
+Probabilistic research on FX and commodity trading strategies: **900+ strategies
+tested with a strict six-gate backtest battery**, honest verdicts, zero survivor
+selection. Built on the ATLAS research pipeline (10 years of FX daily + hourly
+data, 84k-event economic calendar with forecast/actual, 26 commodity futures
+2000→2026).
+
+> This repo is a research laboratory, not a trading system. Nothing here is a
+> recommendation to trade. Edges decay; every result is a claim to re-test, not
+> a truth.
+
+## The protocol (why the numbers are trustworthy)
+
+Every strategy runs the same strict battery, in order:
+
+1. **In-sample excellence** — mean, t-stat (naive + Newey-West lag-5), win rate,
+   outlier-trimmed (best/worst year dropped).
+2. **In-sample Monte Carlo permutation** (1000) — null = random calendar / random
+   signals; gate **p < 1%**.
+3. **Blind holdout** — direction locked in-sample, tested on untouched data,
+   net of costs; t > 2 and p < 0.05.
+4. **Walk-forward** — direction re-estimated on trailing data only (or a
+   trailing-profitability gate), next period traded. Zero lookahead.
+5. **Walk-forward permutation** (1000) — random-window null through the *same*
+   machinery.
+6. **Walk-forward Monte Carlo bootstrap** (5000) — mean 5/50/95%, P(mean ≤ 0).
+
+Plus a **cost ladder** (financing 8/15/25% for commodities; 0.5/1/2-pip RT for
+FX) — a strategy that dies at realistic costs is not a strategy.
+
+Key honesty guards: expanding-window z-scores (standardisation never sees the
+future), next-day-open entry (the pre-event move is never captured), vintage
+audit requirement (stored news "actuals" must be proven as-published).
+
+## Campaigns
+
+| Campaign | Scope | Tests | Result |
+|---|---|---|---|
+| Seasonal grid | 26 commodities × 12 months + 39 named windows | 344 | 6 holdout survivors → 0/8 pass the full strict battery |
+| FX massive campaign | 12 pairs × momentum/vol/reversal/calendar/cross-asset/news/intraday | 535 | 8 OOS survivors → news under-reaction drift on 5 USD pairs |
+| FX strict battery | news drift ×5 pairs, reversal ×2 | 7 | **USDJPY news drift: 4/6 gates** (effect emerged post-2021) |
+| FX round-2 | news-family depth + gold-silver ratio + per-title | ~420 | in progress → committed when complete |
+
+## Headline findings
+
+- **News under-reaction drift (USDJPY)** is the strongest FX candidate: holdout
+  NW t = +3.14, walk-forward p = 0.003, bootstrap P(mean ≤ 0) = 0.000, positive
+  in 5/5 out-of-sample years, robust across the cost ladder. It fails the two
+  *in-sample* gates because the effect genuinely did not exist in 2016–2021 —
+  it is a post-2021 phenomenon. **Vintage audit on the event store is still
+  unresolved** — the drift is not tradeable until stored "actuals" are proven
+  as-published.
+- **Commodity seasonality**: the hog complex is the only family with real
+  structure (Hogs Aug short: +13.9%/yr holdout, t=5.6, 92% win) — but it passes
+  5/6 gates, missing only the strictest walk-forward permutation (p=0.076).
+- **Everything else died** — momentum, calendar, day-of-week, carry, cross-asset,
+  breakouts all fail net of costs, exactly as the pre-registered priors predicted.
+- **Volatility predicts size, not direction** — four independent signals
+  (Bollinger squeeze, bitcoin→FX, volume, event-day vol) all survive; usable for
+  sizing, never for entry.
+
+## Repo layout
+
+```
+scripts/
+  edge_scan.py            data loader + Newey-West + pair constants
+  fx_campaign.py          FX massive campaign (D1 core, 495 tests)
+  fx_campaign_extra.py    FX campaign extras (baskets, news, H1 sessions)
+  fx_campaign_round2.py   round-2 campaign, every test through the full battery
+  fx_strict_battery.py    strict six-gate battery for FX candidates
+  strict_battery.py       strict six-gate battery for seasonal candidates
+  seasonal_backtest.py    seasonal data + monthly returns
+  seasonal_batch.py       seasonal selection->lock->holdout pipeline
+reports/
+  fx_campaign_report.md / fx_campaign_leaderboard_full.csv   (535 tests)
+  fx_strict_battery.md / fx_strict_battery.csv               (six-gate verdicts)
+  strict_battery.md / strict_battery.csv                     (seasonal verdicts)
+  seasonal_campaign_report.md / seasonal_leaderboard.csv     (344 tests)
+  seasonal_locked.json / seasonal_holdout.csv                (locked directions)
+  backtest_results.*.csv                                     (compound sims)
+strategy_catalog.json     machine-readable locked candidates + verdicts
+```
+
+## How to run
+
+```bash
+pip install -r requirements.txt
+# point BASE at a data store with market-data/ (see scripts/edge_scan.py)
+python scripts/fx_strict_battery.py     # six-gate battery on FX candidates
+python scripts/fx_campaign_round2.py    # round-2 scan + battery
+python scripts/seasonal_batch.py        # seasonal selection pipeline
+```
+
+Data layout expected: `market-data/normalized/<PAIR>/<PAIR>_d1.parquet` (FX),
+`market-data/events/events.parquet` (calendar: forecast + actual),
+`market-data/raw/yahoo/COMM_*_d.csv` (commodities).
+
+## Honesty policy
+
+- Negative results are reported as loudly as positive ones — see
+  `strict_battery.md`: **0/8** seasonal candidates pass all six gates.
+- Every headline number is attacked: cost ladders, outlier trim, random-window
+  permutations, roll-convention checks, vintage audits.
+- The master question, applied to every result: *"What would this number look
+  like if the signal contributed nothing?"* — computed explicitly, every time.
