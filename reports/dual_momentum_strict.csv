@@ -1,0 +1,11 @@
+name,n,is_mean,is_t,p_is,ho_mean,ho_t,p_ho,wf_mean,p_wf,boot_p,trim,VERDICT,gates
+dual_mom_top1,228,1.612,3.83,0.001,2.124,4.51,0.001,1.817,0.001,0.0,20.358,PASS,all pass
+dual_mom_top2,228,1.246,3.74,0.001,1.74,5.47,0.001,1.426,0.001,0.0,16.797,PASS,all pass
+buyhold_SPY,240,0.614,1.73,0.043,1.141,2.45,0.009,0.826,0.001,0.0012,11.62,FAIL,|t_is|>2; p_is<0.01
+buyhold_IEF,240,0.199,1.26,0.0839,-0.101,-0.53,0.7083,0.03,0.001,0.404,1.121,FAIL,|t_is|>2; p_is<0.01; ho t>2&p<0.05; boot<0.05
+top1_cost0x,228,1.69,4.02,0.001,2.189,4.64,0.001,1.891,0.001,0.0,21.183,PASS,all pass
+top1_cost2x,228,1.534,3.65,0.002,2.058,4.38,0.001,1.743,0.001,0.0,19.533,PASS,all pass
+top1_cost5x,228,1.298,3.09,0.003,1.861,3.98,0.001,1.521,0.001,0.0,17.058,PASS,all pass
+top1_null_random_rank,228,-0.331,-0.73,0.7932,0.463,1.11,0.1209,0.025,0.001,0.344,2.259,FAIL,|t_is|>2; p_is<0.01; ho t>2&p<0.05; boot<0.05
+top1_ho_first_half,53,,,,2.201,3.63,,,,,,PASS,"t>2 & mean>0 (direct, no IS split)"
+top1_ho_second_half,51,,,,2.044,2.82,,,,,,PASS,"t>2 & mean>0 (direct, no IS split)"
