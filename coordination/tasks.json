@@ -72,7 +72,8 @@
       "result": "C3 execution audit complete (reports/C3_EXECUTION_AUDIT.md): 0 live connectors; MT5/IBKR/T212/TV absent, Alpaca stubbed with credentials only. Honest verdict \u2014 no path places real demo fills today. Recommendation: build IBKR paper connector (place->fill->ledger round trip).",
       "done": "2026-08-11T16:06:50+00:00",
       "cmd": null,
-      "dispatch": null
+      "dispatch": null,
+      "note": " [C6 sign-off: APPROVED \u2014 portability fix verified (health_check --base), gold CSV matches E: exactly (float fmt only), DEPLOYMENT doc matches reality]"
     },
     {
       "id": "T7",
@@ -130,14 +131,15 @@
       "id": "T11",
       "text": "C8: Build IBKR paper connector \u2014 TWS/Gateway API client that connects to the paper account (port 7497), places an order, receives the fill, and writes the ledger entry. Acceptance: one live paper-fill round trip on the desktop. Blocks C3's real-demo-fill criterion. Highest remaining gap to commercial.",
       "priority": "high",
-      "status": "TODO",
-      "owner": null,
+      "status": "BLOCKED",
+      "owner": "joint (desktop: connector built; laptop: gateway prep done)",
       "created": "2026-08-11T16:06:50+00:00",
       "claimed": null,
       "result": null,
       "done": null,
       "cmd": null,
-      "dispatch": null
+      "dispatch": null,
+      "note": "Blocked on HUMAN step: IBKR Gateway/TWS paper login + API on 7497 (docs/IBKR_PAPER_SETUP.md). Round trip is one command away once up."
     }
   ],
   "log": [
