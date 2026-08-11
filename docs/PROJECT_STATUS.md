@@ -123,13 +123,23 @@ loudly on drift (`exit 1`):
 
 ---
 
-## 6. Execution layer — the open item (T6)
+## 6. Execution layer — the open item (T6 / C8)
 `reports/C3_EXECUTION_AUDIT.md` verdict: **LIVE connectors = 0**; Alpaca is
-stubbed (keys only, no order-placing code); MT5 / IBKR / T212 / TradingView are
-**absent**. The intended venue was **IBKR paper** (`paper_trading_playbook.md`
-— "tried earlier, never finished"). `scripts/ibkr_connector.py` exists but is
-not wired to any order path. This is the single largest remaining item toward
-spec §4 #2 (a full paper-trade cycle).
+stubbed (keys only); MT5 / IBKR / T212 / TradingView were **absent**. The
+intended venue was **IBKR paper** (`paper_trading_playbook.md`).
+
+**C8 connector BUILT (desktop, pushed):** `scripts/ibkr_connector.py` does a
+place → fill → ledger round trip via `ib_insync` (STK/FUT/CASH/CFD), reads
+`IBKR_HOST/PORT/CLIENT_ID` from `dourmouse/.env`, appends to
+`market-data/executions/executions.csv` in the forward-ledger style. Verified:
+clean fail when the Gateway is down.
+
+**Laptop side prepped:** `ib_insync` 0.9.86 installed in the dourmouse venv;
+IBKR env added to `dourmouse/.env`; `--check` confirms the path works up to
+port 7497. **Blocked on a human step:** an IBKR Gateway/TWS (paper account)
+must be installed, logged in, API enabled on 7497, and reachable at
+`192.168.1.95` / `100.84.156.49`. Exact steps: `docs/IBKR_PAPER_SETUP.md`.
+This is the last unmet item toward spec §4 #2 (a full paper-trade cycle).
 
 ---
 
