@@ -8,7 +8,7 @@
       "owner": null,
       "created": "2026-08-11T00:00:00+00:00",
       "claimed": null,
-      "result": null,
+      "result": "Milestone 2 delivered: monthly reported net-purchase grid Nov2020-Jun2026 (58 verified months, WGC monthly reports, row-by-row audited; annual 2014-2025 companion). data/central_bank_gold_monthly.csv + provenance README + scripts/gold_monthly_build.py pushed to main. Bookshelf wiring + weight_calibrator for GOLD = desktop step (awaiting).",
       "done": null
     },
     {
@@ -78,12 +78,12 @@
       "id": "T7",
       "text": "C4: Chat feed + relay hardening \u2014 token-gated dashboard send, message archive rotation, uptime heartbeat broadcast every 5 min; laptop tests from Mac",
       "priority": "mid",
-      "status": "TODO",
-      "owner": null,
+      "status": "DONE",
+      "owner": "laptop-dourmouse",
       "created": "2026-08-11T15:14:48+00:00",
       "claimed": null,
-      "result": null,
-      "done": null,
+      "result": "C4 hardening: token-gated dashboard send + heartbeat; desktop shipped engine/hub gating (merged on main)",
+      "done": "2026-08-11T15:57:17+00:00",
       "cmd": null,
       "dispatch": null
     },
@@ -105,11 +105,11 @@
       "text": "C6: Commercial packaging \u2014 overhaul README, one-command setup on any fresh machine, LICENSE, deployment doc for the full stack (engine + data + relay + chat)",
       "priority": "mid",
       "status": "DONE",
-      "owner": "desktop-atlas",
+      "owner": "laptop-dourmouse",
       "created": "2026-08-11T15:14:48+00:00",
       "claimed": "2026-08-11T15:46:56+00:00",
-      "result": "C6 packaging built: setup.bat (one-command clone/deps/config/smoke), DEPLOY.md (full topology+lifecycle+security), LICENSE (MIT), scripts/health_check.py smoke gate \u2014 SMOKE TEST PASS (registry/keys/data/golden all green, exit 0). Laptop to review",
-      "done": "2026-08-11T15:46:56+00:00",
+      "result": "C6 packaging complete: LICENSE, docs/DEPLOYMENT.md, scripts/health_check.py, README setup section",
+      "done": "2026-08-11T15:57:17+00:00",
       "cmd": null,
       "dispatch": null
     },
@@ -257,6 +257,20 @@
       "event": "done",
       "id": "T9",
       "result": "C6 packaging built: setup.bat (one-command clone/deps/config/smoke), DEPLOY.md (full topology+lifecycle+security), LICENSE (MIT), scripts/health_check.py smoke gate \u2014 SMOKE TEST PASS (registry/keys/data/golden all green, exit 0). Laptop to review"
+    },
+    {
+      "t": "2026-08-11T15:57:17+00:00",
+      "who": "laptop-dourmouse",
+      "event": "done",
+      "id": "T9",
+      "result": "C6 packaging complete: LICENSE, docs/DEPLOYMENT.md, scripts/health_check.py, README setup section"
+    },
+    {
+      "t": "2026-08-11T15:57:17+00:00",
+      "who": "laptop-dourmouse",
+      "event": "done",
+      "id": "T7",
+      "result": "C4 hardening: token-gated dashboard send + heartbeat; desktop shipped engine/hub gating (merged on main)"
     }
   ]
 }
