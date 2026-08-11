@@ -1,0 +1,69 @@
+{
+  "n_is": 1138,
+  "n_oos": 1192,
+  "oos_r2_composite": 0.0161,
+  "oos_r2_bench_rv1": -0.8083,
+  "oos_r2_bench_rv22": 0.0136,
+  "calibration_is": {
+    "q_means": [
+      0.00249,
+      0.00258,
+      0.00284,
+      0.0031,
+      0.00442
+    ],
+    "monotonic": true,
+    "q5_q1_ratio": 1.77,
+    "spearman": 0.2041,
+    "n": 1138
+  },
+  "calibration_oos": {
+    "q_means": [
+      0.00306,
+      0.0044,
+      0.00476,
+      0.00518,
+      0.00568
+    ],
+    "monotonic": true,
+    "q5_q1_ratio": 1.86,
+    "spearman": 0.2211,
+    "n": 1192
+  },
+  "perm": {
+    "p_rho": 0.0,
+    "p_qspread": 0.0,
+    "n_perm": 1000
+  },
+  "application_drift": {
+    "n_events": 1201,
+    "by_tercile": {
+      "low": {
+        "n": 401,
+        "mean_net_pct": 0.0556,
+        "t": 2.21,
+        "win": 0.559
+      },
+      "mid": {
+        "n": 400,
+        "mean_net_pct": 0.0113,
+        "t": 0.33,
+        "win": 0.492
+      },
+      "high": {
+        "n": 400,
+        "mean_net_pct": 0.1604,
+        "t": 3.77,
+        "win": 0.568
+      }
+    },
+    "flat": {
+      "ann_pct": 19.096,
+      "sharpe": 1.729
+    },
+    "vol_scaled": {
+      "ann_pct": 15.935,
+      "sharpe": 1.564
+    }
+  }
+}

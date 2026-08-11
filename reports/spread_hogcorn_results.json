@@ -1,0 +1,68 @@
+{
+  "spread": "hogcorn",
+  "name": "Hog-corn feed spread (HE - ZC)",
+  "mechanism": "feeder must buy corn and sell hogs on the production calendar",
+  "n_bars": 6418,
+  "is_bars": 3505,
+  "oos_bars": 2913,
+  "adf_is": -3.85,
+  "adf_oos": -5.11,
+  "coint_is": true,
+  "coint_oos": true,
+  "stage1": {
+    "label": "IS",
+    "n": 3505,
+    "mean": -14.099,
+    "sharpe": -1.05,
+    "win": 39.7,
+    "t": -3.9,
+    "mean_vs_cost_x": -11.75
+  },
+  "stage2_p": 1.0,
+  "stage3": {
+    "label": "WF",
+    "n": 3667,
+    "mean": -12.112,
+    "sharpe": -0.88,
+    "win": NaN,
+    "t": -3.37
+  },
+  "stage4_p": null,
+  "oos": {
+    "label": "OOS",
+    "n": 2913,
+    "mean": -10.826,
+    "sharpe": -0.72,
+    "win": 37.9,
+    "t": -2.44
+  },
+  "corr_with_legs": {
+    "COMM_HE_d.csv": 0.096,
+    "COMM_ZC_d.csv": 0.105
+  },
+  "roll_probe": {
+    "roll_days": 146,
+    "edge_full_pct": -10.826,
+    "edge_excl_pct": -10.884,
+    "roll_share_of_edge": null
+  },
+  "params": {
+    "lookback": 90,
+    "entry_z": 2.0,
+    "tstop": 20,
+    "cost_per_leg_pct": 0.3,
+    "fin_per_day_pct": 0.01,
+    "block": 20,
+    "n_perm": 1000,
+    "quick": false
+  },
+  "timing_s": {
+    "load": 2.8,
+    "eg": 0.0,
+    "stage1": 0.0,
+    "stage2": 6.5,
+    "stage3": 0.1,
+    "stage4": 3.5,
+    "total": 12.9
+  }
+}

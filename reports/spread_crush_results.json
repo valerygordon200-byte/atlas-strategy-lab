@@ -1,0 +1,69 @@
+{
+  "spread": "crush",
+  "name": "Soybean crush (ZS - 0.733ZM - 0.183ZL)",
+  "mechanism": "processor margin: crusher must buy beans and sell meal+oil on the crop calendar",
+  "n_bars": 6386,
+  "is_bars": 3471,
+  "oos_bars": 2915,
+  "adf_is": -5.71,
+  "adf_oos": -4.34,
+  "coint_is": true,
+  "coint_oos": true,
+  "stage1": {
+    "label": "IS",
+    "n": 3471,
+    "mean": -3.952,
+    "sharpe": -0.5,
+    "win": 22.0,
+    "t": -1.87,
+    "mean_vs_cost_x": -3.44
+  },
+  "stage2_p": 1.0,
+  "stage3": {
+    "label": "WF",
+    "n": 3669,
+    "mean": -4.914,
+    "sharpe": -0.83,
+    "win": NaN,
+    "t": -3.15
+  },
+  "stage4_p": null,
+  "oos": {
+    "label": "OOS",
+    "n": 2915,
+    "mean": -10.238,
+    "sharpe": -1.83,
+    "win": 21.7,
+    "t": -6.23
+  },
+  "corr_with_legs": {
+    "COMM_ZS_d.csv": 0.006,
+    "COMM_ZM_d.csv": -0.143,
+    "COMM_ZL_d.csv": 0.008
+  },
+  "roll_probe": {
+    "roll_days": 52,
+    "edge_full_pct": -10.238,
+    "edge_excl_pct": -11.074,
+    "roll_share_of_edge": null
+  },
+  "params": {
+    "lookback": 90,
+    "entry_z": 2.0,
+    "tstop": 20,
+    "cost_per_leg_pct": 0.3,
+    "fin_per_day_pct": 0.01,
+    "block": 20,
+    "n_perm": 1000,
+    "quick": false
+  },
+  "timing_s": {
+    "load": 0.1,
+    "eg": 0.0,
+    "stage1": 0.0,
+    "stage2": 6.3,
+    "stage3": 0.1,
+    "stage4": 3.6,
+    "total": 10.1
+  }
+}
