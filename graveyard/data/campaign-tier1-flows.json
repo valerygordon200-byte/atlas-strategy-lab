@@ -1,0 +1,19 @@
+{
+  "id": "campaign-tier1-flows",
+  "name": "Index reconstitution / witching / LETF decay / window dressing",
+  "family": "structurally-forced flows",
+  "mechanism_claim": "Index add/drop, expiry close-outs, LETF daily rebalancing, quarter-end window dressing create forced flows.",
+  "forced_participant": "Named per mechanism (index funds, LETF issuers, fund managers) — but tested and killed in the 30-candidate campaign.",
+  "data": "Russell reconstitution dates, witching dates, leveraged ETF pairs, IPO lockups; yfinance.",
+  "tests_run": [
+    "30-candidate campaign",
+    "full strict battery",
+    "event studies"
+  ],
+  "kill_criterion": "No candidate survived the full pipeline; campaign verdict = no promoted survivors.",
+  "post_mortem": "The mechanisms are real (these ARE forced flows) but the effects are either already priced (crowded, e.g. witching) or too small after costs (IPO lockups: 844-name sample, no OOS edge strong enough). Real mechanism does not guarantee a tradeable residual.",
+  "killed_date": "2026-08-11",
+  "source": "reports/campaign_30_verdict.md; TRACK_A/B/C reports",
+  "headline": "0 survivors from the 30-candidate campaign",
+  "status": "dead"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "fx-pin-bar-reversal",
+  "name": "Pin Bar / Hammer Reversal",
+  "family": "price-action",
+  "mechanism_claim": "Single-candle rejection patterns predict reversal.",
+  "forced_participant": "None found.",
+  "data": "12 FX pairs, 4,482 backtest trades.",
+  "tests_run": [
+    "registry backtest battery",
+    "IS/OOS split",
+    "strict cost model"
+  ],
+  "kill_criterion": "OOS median Sharpe -1.437; IS best 0.662 is noise.",
+  "post_mortem": "Chart patterns without a mechanism and without a forced participant. The IS edge is in-sample noise (as the permutation stages confirm).",
+  "killed_date": "2026-08-06",
+  "source": "E:/forex-data/strategies/registry.parquet (pin-bar-reversal)",
+  "headline": "IS 0.662 -> OOS median -1.437",
+  "status": "dead"
+}

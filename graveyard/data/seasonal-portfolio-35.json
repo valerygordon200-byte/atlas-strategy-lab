@@ -1,0 +1,17 @@
+{
+  "id": "seasonal-portfolio-35",
+  "name": "35-selection seasonal portfolio at $100 (naive)",
+  "family": "calendar-forced hedging (portfolio construction)",
+  "mechanism_claim": "Diversified seasonal basket at $100 compounded.",
+  "forced_participant": "n/a — construction test, not mechanism test.",
+  "data": "Same seasonal universe; $100 starting capital, $100 min notional, platform margin rules.",
+  "tests_run": [
+    "$100 compounded simulation, all 35 selections every year"
+  ],
+  "kill_criterion": "Account blown: equity -$1.93 by 2015-09, Sharpe -2.76, max DD -101.9%.",
+  "post_mortem": "The $100 minimum with ~9 concurrent positions forces ~9x gross leverage (280 months forced oversizing). At $100 the platform cap allows 6-8 trades/yr, not 35. A portfolio built without the account-size constraint is untradeable by construction.",
+  "killed_date": "2026-08-11",
+  "source": "reports/SEASONAL_VERDICT.md (Version A)",
+  "headline": "blown account in 8 months at $100; Sharpe -2.76 — untradeable construction",
+  "status": "dead"
+}

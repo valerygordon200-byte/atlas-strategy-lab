@@ -1,0 +1,18 @@
+{
+  "id": "fx-breakout-family",
+  "name": "Opening-range / Dual Thrust / London breakouts",
+  "family": "breakout",
+  "mechanism_claim": "Range breaks carry momentum.",
+  "forced_participant": "None found.",
+  "data": "12 FX pairs D1, 2016-2026.",
+  "tests_run": [
+    "full strict battery",
+    "walk-forward"
+  ],
+  "kill_criterion": "Fades out-of-sample; graveyard-listed.",
+  "post_mortem": "All directional breakout systems tested in this project fade rather than follow.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard",
+  "headline": "dead",
+  "status": "dead"
+}

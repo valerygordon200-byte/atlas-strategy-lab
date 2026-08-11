@@ -1,0 +1,17 @@
+{
+  "id": "fx-bollinger-mean-reversion",
+  "name": "Bollinger-band mean reversion (single instrument)",
+  "family": "mean-reversion",
+  "mechanism_claim": "Price reverts to the band.",
+  "forced_participant": "None — without a cointegration structure there is no reason for the level to revert.",
+  "data": "12 FX pairs D1, 2016-2026.",
+  "tests_run": [
+    "full strict battery"
+  ],
+  "kill_criterion": "Fails OOS without cointegration; graveyard-listed.",
+  "post_mortem": "Single-instrument band reversion is not mean reversion — it is gambling on a level with no anchor. The cointegration variants (spreads with a real economic link) remain untested/eligible.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard",
+  "headline": "dead (single-instrument; no cointegration)",
+  "status": "dead"
+}

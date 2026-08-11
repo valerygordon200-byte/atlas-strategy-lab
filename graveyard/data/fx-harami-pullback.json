@@ -1,0 +1,17 @@
+{
+  "id": "fx-harami-pullback",
+  "name": "Harami Pullback Entry",
+  "family": "price-action",
+  "mechanism_claim": "Candlestick pullback continuation.",
+  "forced_participant": "None found.",
+  "data": "12 FX pairs, 4 backtest trades.",
+  "tests_run": [
+    "registry backtest battery"
+  ],
+  "kill_criterion": "Insufficient sample (4 trades) — statistically meaningless.",
+  "post_mortem": "Nothing to believe: 4 trades cannot support any claim. Registry status: insufficient-sample.",
+  "killed_date": "2026-08-06",
+  "source": "E:/forex-data/strategies/registry.parquet (harami-pullback)",
+  "headline": "4 trades total — insufficient sample",
+  "status": "dead"
+}

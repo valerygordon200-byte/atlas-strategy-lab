@@ -1,0 +1,17 @@
+{
+  "id": "fx-weekend-crypto",
+  "name": "Weekend crypto move -> FX prediction",
+  "family": "cross-asset",
+  "mechanism_claim": "Weekend crypto moves leak into Monday FX.",
+  "forced_participant": "None found.",
+  "data": "BTCUSD + FX pairs D1.",
+  "tests_run": [
+    "full strict battery"
+  ],
+  "kill_criterion": "No OOS effect.",
+  "post_mortem": "Graveyard-listed after failed test.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard",
+  "headline": "dead",
+  "status": "dead"
+}

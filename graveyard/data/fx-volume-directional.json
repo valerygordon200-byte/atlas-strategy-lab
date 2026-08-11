@@ -1,0 +1,17 @@
+{
+  "id": "fx-volume-directional",
+  "name": "Volume as a directional predictor",
+  "family": "volume",
+  "mechanism_claim": "Volume precedes price direction.",
+  "forced_participant": "None — volume reflects participation, it forces nothing.",
+  "data": "12 FX pairs D1, 2016-2026.",
+  "tests_run": [
+    "full strict battery"
+  ],
+  "kill_criterion": "Volume predicts move SIZE, not direction — confirmed null for direction.",
+  "post_mortem": "A rare confirmed-positive: volume DOES predict the size of future moves (validated with real t-stats), and is null for direction. Repurposed as a risk-sizing input, never an entry signal.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard; VOL_MODULE.md",
+  "headline": "null for direction; valid for size (risk-sizing only)",
+  "status": "dead"
+}

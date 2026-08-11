@@ -1,0 +1,20 @@
+{
+  "id": "fx-dollar-basket-underreaction",
+  "name": "Dollar-basket EUR/USD news under-reaction",
+  "family": "informed under-reaction",
+  "mechanism_claim": "US releases move the dollar; markets under-react to genuine surprises.",
+  "forced_participant": "Mechanism plausible (hedgers forced to reprice), but the test failed — see post-mortem.",
+  "data": "Forex Factory event archive; 5-pair basket; EURUSD execution leg.",
+  "tests_run": [
+    "404-cell campaign",
+    "surprise z vs basket move",
+    "momentum control arm",
+    "strict battery"
+  ],
+  "kill_criterion": "1/404 full-pass initially; per-pair evaluation after a concatenation bug fix — the apparent signal was a construction artifact (all pairs aggregated into one frame).",
+  "post_mortem": "The first-pass 'survivor' was a bug: sizez/volman/streak builders concatenated all 5 pairs, so each 'pair' row was the same aggregate. Fixed to per-pair evaluation: 404 honest tests, no surviving full-pass candidate. The failure was real per-pair null, not just a proxy problem.",
+  "killed_date": "2026-08-11",
+  "source": "fx_campaign_round2.py; fx_strict_battery.py; campaign reports",
+  "headline": "404 tests, 1 artifact 'pass' -> 0 after per-pair fix",
+  "status": "dead"
+}

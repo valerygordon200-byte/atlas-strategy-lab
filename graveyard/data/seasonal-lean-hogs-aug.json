@@ -1,0 +1,20 @@
+{
+  "id": "seasonal-lean-hogs-aug",
+  "name": "Lean Hogs August SHORT (commodity seasonal)",
+  "family": "calendar-forced hedging",
+  "mechanism_claim": "Hog producers must move hogs before summer heat; packers buy at a fixed calendar cadence.",
+  "forced_participant": "Named: hog producers/packers (biological calendar). BUT the effect did not survive the roll check — see post-mortem.",
+  "data": "Yahoo =F continuous front-month, 2000-2026 daily OHLC; roll-decomposed front/back/gap legs.",
+  "tests_run": [
+    "305-cell selection 2000-2014 |t|>2",
+    "blind holdout 2015-2026 net of spread+financing",
+    "roll decomposition (legA held path / legB back path / roll gap)",
+    "golden regression lock"
+  ],
+  "kill_criterion": "Roll artifact: apparent edge lives in the roll discontinuity, not in any capturable held position.",
+  "post_mortem": "Continuous series: -13.62% mean, t=-7.53 (looks like a gift). Decomposed: real held-position path -0.03%, t=-0.02 (a coin flip); the roll gap itself carries -13.59%, t=-10.99. The 'edge' was the cost of splicing contracts, never a tradeable return. A short in August on the continuous series is not a short in the contract that is live in August.",
+  "killed_date": "2026-08-11",
+  "source": "reports/SEASONAL_VERDICT.md; E:/forex-data/scripts/hog_august_roll_check; golden_regressions.py",
+  "headline": "continuous -13.62% t-7.53 -> real path -0.03% t-0.02 (roll gap -13.59% t-10.99)",
+  "status": "dead"
+}

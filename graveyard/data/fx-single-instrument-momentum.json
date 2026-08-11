@@ -1,0 +1,17 @@
+{
+  "id": "fx-single-instrument-momentum",
+  "name": "Single-instrument time-series momentum / trend-following",
+  "family": "momentum",
+  "mechanism_claim": "Trend persistence on one instrument.",
+  "forced_participant": "None found.",
+  "data": "12 FX pairs D1, 2016-2026.",
+  "tests_run": [
+    "full strict battery"
+  ],
+  "kill_criterion": "Decays sharply post-publication (Sharpe 0.96 -> 0.04 documented for the published variant).",
+  "post_mortem": "Genuinely strong in-sample, genuinely gone out-of-sample. The canonical case of an edge being arbitraged the moment it is published.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard; prior momentum tests",
+  "headline": "dead — published edges decay",
+  "status": "dead"
+}

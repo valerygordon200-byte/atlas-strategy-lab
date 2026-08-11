@@ -1,0 +1,17 @@
+{
+  "id": "fx-day-of-week-turn-of-month",
+  "name": "Day-of-week / turn-of-month calendar effects",
+  "family": "calendar",
+  "mechanism_claim": "Recurring weekday/month-boundary FX patterns.",
+  "forced_participant": "None named — retail calendar folklore.",
+  "data": "12 FX pairs D1, 2016-2026.",
+  "tests_run": [
+    "full strict battery"
+  ],
+  "kill_criterion": "No consistent OOS effect on liquid FX.",
+  "post_mortem": "Calendar patterns on major FX are arbitraged; graveyard-listed.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard",
+  "headline": "dead",
+  "status": "dead"
+}

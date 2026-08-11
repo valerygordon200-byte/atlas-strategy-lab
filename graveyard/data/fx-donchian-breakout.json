@@ -1,0 +1,19 @@
+{
+  "id": "fx-donchian-breakout",
+  "name": "Donchian Channel Breakout (Turtle-style)",
+  "family": "breakout",
+  "mechanism_claim": "Trend following on channel breaks, classic Turtle rules.",
+  "forced_participant": "None found. Trend followers are voluntary; no one is forced to transact.",
+  "data": "12 FX pairs D1+H1, 2016-2026, 13,655 backtest trades.",
+  "tests_run": [
+    "registry backtest battery",
+    "IS/OOS split",
+    "strict cost model"
+  ],
+  "kill_criterion": "OOS median Sharpe negative (-0.484); best-pair Sharpe 0.297 in-sample decays to negative OOS.",
+  "post_mortem": "Directional breakout systems fade after publication (this project's graveyard rule). No forced participant, no survival.",
+  "killed_date": "2026-08-06",
+  "source": "E:/forex-data/strategies/registry.parquet (donchian-breakout)",
+  "headline": "IS best Sharpe 0.297 -> OOS median -0.484",
+  "status": "dead"
+}

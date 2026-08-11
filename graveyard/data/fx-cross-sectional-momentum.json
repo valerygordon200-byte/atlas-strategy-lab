@@ -1,0 +1,19 @@
+{
+  "id": "fx-cross-sectional-momentum",
+  "name": "Cross-sectional momentum on FX pairs",
+  "family": "momentum",
+  "mechanism_claim": "Rank pairs by trailing return, buy the leaders.",
+  "forced_participant": "None found.",
+  "data": "12 FX pairs D1, 2016-2026.",
+  "tests_run": [
+    "full strict battery",
+    "permutation",
+    "walk-forward"
+  ],
+  "kill_criterion": "Fails OOS; graveyard-listed.",
+  "post_mortem": "Directional momentum is competed away fast (documented post-publication decay). No forced flow sustains it.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard; fx_campaign results",
+  "headline": "dead per project graveyard (no OOS hold)",
+  "status": "dead"
+}

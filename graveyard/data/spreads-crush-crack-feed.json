@@ -1,0 +1,19 @@
+{
+  "id": "spreads-crush-crack-feed",
+  "name": "Crush / crack / hog-corn feed spreads",
+  "family": "relative-value / statistical arbitrage",
+  "mechanism_claim": "Processor margins (soybean crush, crude crack, hog-corn feed) mean-revert around an economic anchor.",
+  "forced_participant": "Named: processors must hedge margins (forced flows on both legs).",
+  "data": "Continuous + individual contract legs; roll-resistance tested both ways.",
+  "tests_run": [
+    "roll-resistance check (two constructions)",
+    "Engle-Granger cointegration IS+OOS",
+    "full strict battery"
+  ],
+  "kill_criterion": "Campaign verdict: no spread candidate survived the full pipeline on the roll-resistant construction.",
+  "post_mortem": "The mechanisms are the project's strongest (genuine forced hedgers) but the tradable residual did not survive: cointegration not stable OOS, or net edge below 2x round-trip cost after two legs of spread + financing. Roll-resistance check ran before any number was trusted (per the standing rule).",
+  "killed_date": "2026-08-11",
+  "source": "reports/TRACK_A_SPREADS.md",
+  "headline": "0/4 spreads survived the pipeline",
+  "status": "dead"
+}

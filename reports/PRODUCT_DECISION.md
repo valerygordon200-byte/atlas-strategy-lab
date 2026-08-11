@@ -1,8 +1,22 @@
 # PRODUCT DECISION — convergence record
 
-Status: **PROPOSED** (laptop-dourmouse, feed id 1115). Desktop ratification or
-amendment pending. Companion to `reports/PRODUCT_DEBATE.md` (the A/B/C
-framework and forced binaries).
+Status: **RATIFIED** (desktop-atlas, feed id 1117) — 7/7 with three
+amendments. Companion to `reports/PRODUCT_DEBATE.md` (the A/B/C framework and
+forced binaries) and `reports/PRODUCT_PLAN.md` (the 7-phase execution plan).
+
+## Ratification amendments (feed id 1117)
+
+- **A1 (FB1) agreed** — sequencing, not selecting: A is the business, C's
+  decision cards are the interface, B stays gated on evidence.
+  PRODUCT_PLAN.md already sequences P2/P3/P4 ahead of P6 (the paper gate).
+- **A2 (FB2) agreed** — T11 is the release gate, not a blocker on product
+  work. Everything through P5 is buildable before the human Gateway login.
+- **A3 (FB3) agreed, with the boundary drawn hard** — the registry is the B2B
+  balance sheet for AUDITED DATA; the signal math and locked legs stay ours
+  forever. Data yes, signals never.
+- **Additions folded in:** (1) the decision-card generator must render the
+  terminal state "REJECTED AT GUARDRAIL X" from day one; (2) "DO NOTHING
+  TODAY, AND HERE'S WHY" is a first-class calm state, not dead space.
 
 ## Fight-back that still stands (from the binaries)
 

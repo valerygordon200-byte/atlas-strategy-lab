@@ -1,0 +1,19 @@
+{
+  "id": "seasonal-commodities-28",
+  "name": "All 28 commodity-month seasonals, clean test",
+  "family": "calendar-forced hedging",
+  "mechanism_claim": "Recurring monthly price patterns from forced physical-calendar flows (harvests, blends, seasons).",
+  "forced_participant": "Candidates named per cell, but see result: 0/28 significant on the roll-adjusted test.",
+  "data": "26 instruments x 12 months = 312 cells; Yahoo =F continuous; roll-adjusted returns.",
+  "tests_run": [
+    "312-cell clean roll-adjusted test",
+    "per-cell |t| threshold",
+    "roll-resistance check"
+  ],
+  "kill_criterion": "0/28 significant once returns are roll-adjusted and tradeable — the entire family is void.",
+  "post_mortem": "The flagship (Aug hogs) died to the roll artifact; the clean test confirmed the whole family follows. The apparent edge was construction, not market. Do not re-test any single-instrument calendar effect.",
+  "killed_date": "2026-08-11",
+  "source": "reports/SEASONAL_VERDICT.md; campaign brief step 1 roll-adjusted re-run",
+  "headline": "0/28 significant on clean roll-adjusted test — seasonal catalog is void",
+  "status": "dead"
+}

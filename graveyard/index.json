@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "built": "2026-08-11",
+  "count": 17,
+  "families": [
+    "breakout",
+    "calendar",
+    "calendar-forced hedging",
+    "calendar-forced hedging (portfolio construction)",
+    "cross-asset",
+    "informed under-reaction",
+    "mean-reversion",
+    "momentum",
+    "positioning",
+    "price-action",
+    "relative-value / statistical arbitrage",
+    "structurally-forced flows",
+    "volume"
+  ],
+  "status_counts": {
+    "dead": 17
+  },
+  "entries": [
+    {
+      "id": "seasonal-lean-hogs-aug",
+      "name": "Lean Hogs August SHORT (commodity seasonal)",
+      "family": "calendar-forced hedging",
+      "status": "dead",
+      "killed_date": "2026-08-11",
+      "headline": "continuous -13.62% t-7.53 -> real path -0.03% t-0.02 (roll gap -13.59% t-10.99)",
+      "source": "reports/SEASONAL_VERDICT.md; E:/forex-data/scripts/hog_august_roll_check; golden_regressions.py"
+    },
+    {
+      "id": "seasonal-commodities-28",
+      "name": "All 28 commodity-month seasonals, clean test",
+      "family": "calendar-forced hedging",
+      "status": "dead",
+      "killed_date": "2026-08-11",
+      "headline": "0/28 significant on clean roll-adjusted test — seasonal catalog is void",
+      "source": "reports/SEASONAL_VERDICT.md; campaign brief step 1 roll-adjusted re-run"
+    },
+    {
+      "id": "seasonal-portfolio-35",
+      "name": "35-selection seasonal portfolio at $100 (naive)",
+      "family": "calendar-forced hedging (portfolio construction)",
+      "status": "dead",
+      "killed_date": "2026-08-11",
+      "headline": "blown account in 8 months at $100; Sharpe -2.76 — untradeable construction",
+      "source": "reports/SEASONAL_VERDICT.md (Version A)"
+    },
+    {
+      "id": "fx-donchian-breakout",
+      "name": "Donchian Channel Breakout (Turtle-style)",
+      "family": "breakout",
+      "status": "dead",
+      "killed_date": "2026-08-06",
+      "headline": "IS best Sharpe 0.297 -> OOS median -0.484",
+      "source": "E:/forex-data/strategies/registry.parquet (donchian-breakout)"
+    },
+    {
+      "id": "fx-pin-bar-reversal",
+      "name": "Pin Bar / Hammer Reversal",
+      "family": "price-action",
+      "status": "dead",
+      "killed_date": "2026-08-06",
+      "headline": "IS 0.662 -> OOS median -1.437",
+      "source": "E:/forex-data/strategies/registry.parquet (pin-bar-reversal)"
+    },
+    {
+      "id": "fx-harami-pullback",
+      "name": "Harami Pullback Entry",
+      "family": "price-action",
+      "status": "dead",
+      "killed_date": "2026-08-06",
+      "headline": "4 trades total — insufficient sample",
+      "source": "E:/forex-data/strategies/registry.parquet (harami-pullback)"
+    },
+    {
+      "id": "fx-cross-sectional-momentum",
+      "name": "Cross-sectional momentum on FX pairs",
+      "family": "momentum",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "dead per project graveyard (no OOS hold)",
+      "source": "EDGE-FINDING MASTER PLAN graveyard; fx_campaign results"
+    },
+    {
+      "id": "fx-day-of-week-turn-of-month",
+      "name": "Day-of-week / turn-of-month calendar effects",
+      "family": "calendar",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "dead",
+      "source": "EDGE-FINDING MASTER PLAN graveyard"
+    },
+    {
+      "id": "fx-dollar-basket-underreaction",
+      "name": "Dollar-basket EUR/USD news under-reaction",
+      "family": "informed under-reaction",
+      "status": "dead",
+      "killed_date": "2026-08-11",
+      "headline": "404 tests, 1 artifact 'pass' -> 0 after per-pair fix",
+      "source": "fx_campaign_round2.py; fx_strict_battery.py; campaign reports"
+    },
+    {
+      "id": "fx-breakout-family",
+      "name": "Opening-range / Dual Thrust / London breakouts",
+      "family": "breakout",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "dead",
+      "source": "EDGE-FINDING MASTER PLAN graveyard"
+    },
+    {
+      "id": "fx-single-instrument-momentum",
+      "name": "Single-instrument time-series momentum / trend-following",
+      "family": "momentum",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "dead — published edges decay",
+      "source": "EDGE-FINDING MASTER PLAN graveyard; prior momentum tests"
+    },
+    {
+      "id": "fx-cot-standalone",
+      "name": "COT positioning as a standalone signal",
+      "family": "positioning",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "dead as standalone signal",
+      "source": "EDGE-FINDING MASTER PLAN graveyard"
+    },
+    {
+      "id": "fx-volume-directional",
+      "name": "Volume as a directional predictor",
+      "family": "volume",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "null for direction; valid for size (risk-sizing only)",
+      "source": "EDGE-FINDING MASTER PLAN graveyard; VOL_MODULE.md"
+    },
+    {
+      "id": "fx-weekend-crypto",
+      "name": "Weekend crypto move -> FX prediction",
+      "family": "cross-asset",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "dead",
+      "source": "EDGE-FINDING MASTER PLAN graveyard"
+    },
+    {
+      "id": "fx-bollinger-mean-reversion",
+      "name": "Bollinger-band mean reversion (single instrument)",
+      "family": "mean-reversion",
+      "status": "dead",
+      "killed_date": "2026-08-08",
+      "headline": "dead (single-instrument; no cointegration)",
+      "source": "EDGE-FINDING MASTER PLAN graveyard"
+    },
+    {
+      "id": "campaign-tier1-flows",
+      "name": "Index reconstitution / witching / LETF decay / window dressing",
+      "family": "structurally-forced flows",
+      "status": "dead",
+      "killed_date": "2026-08-11",
+      "headline": "0 survivors from the 30-candidate campaign",
+      "source": "reports/campaign_30_verdict.md; TRACK_A/B/C reports"
+    },
+    {
+      "id": "spreads-crush-crack-feed",
+      "name": "Crush / crack / hog-corn feed spreads",
+      "family": "relative-value / statistical arbitrage",
+      "status": "dead",
+      "killed_date": "2026-08-11",
+      "headline": "0/4 spreads survived the pipeline",
+      "source": "reports/TRACK_A_SPREADS.md"
+    }
+  ]
+}

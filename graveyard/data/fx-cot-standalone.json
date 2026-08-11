@@ -1,0 +1,17 @@
+{
+  "id": "fx-cot-standalone",
+  "name": "COT positioning as a standalone signal",
+  "family": "positioning",
+  "mechanism_claim": "Commercial positioning predicts price.",
+  "forced_participant": "Commercials are the forced participants — but the public report is too lagged and too crowded to trade.",
+  "data": "COT weekly reports, FX, 2016-2026.",
+  "tests_run": [
+    "full strict battery"
+  ],
+  "kill_criterion": "No standalone OOS edge.",
+  "post_mortem": "The mechanism is real (commercials ARE forced) but the signal is public, weekly, and lagged — everyone trades it, so it prices the information before you can. Mechanism real, tradeability zero.",
+  "killed_date": "2026-08-08",
+  "source": "EDGE-FINDING MASTER PLAN graveyard",
+  "headline": "dead as standalone signal",
+  "status": "dead"
+}
