@@ -15,12 +15,12 @@
       "id": "T2",
       "text": "Build unified data-ingest registry replacing per-script loaders (resolve asset/factor key -> source, quality gates, battery feed)",
       "priority": "mid",
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "owner": "desktop-atlas",
       "created": "2026-08-11T00:00:00+00:00",
       "claimed": "2026-08-11T15:05:31+00:00",
-      "result": null,
-      "done": null
+      "result": "Unified ingest registry built (data_registry.py + registry.json + gates); both event loaders migrated; drift regression holds (OOS t 3.711); report reports/T2_INGEST_REGISTRY.md",
+      "done": "2026-08-11T15:12:44+00:00"
     },
     {
       "id": "T3",
@@ -69,6 +69,13 @@
       "who": "desktop-atlas",
       "event": "claim",
       "id": "T2"
+    },
+    {
+      "t": "2026-08-11T15:12:44+00:00",
+      "who": "desktop-atlas",
+      "event": "done",
+      "id": "T2",
+      "result": "Unified ingest registry built (data_registry.py + registry.json + gates); both event loaders migrated; drift regression holds (OOS t 3.711); report reports/T2_INGEST_REGISTRY.md"
     }
   ]
 }
