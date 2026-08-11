@@ -55,6 +55,8 @@ SERVICES = [
     {"name": "hub", "cwd": DM, "health": "http://127.0.0.1:8791/hub.html",
      "cmd": [PY, "tools/serve_hub.py", "--port", "8791"],
      "env": {"HUB_ENGINE_TOKEN": TOKEN}},
+    {"name": "notify", "cwd": ROOT, "health": None, "pattern": "notify_watch",
+     "cmd": [PY, "relay/notify_watch.py", "--poll", "5"]},
 ]
 
 STATE: dict[str, dict] = {}

@@ -89,7 +89,30 @@ anyone else gets 401 on POST /send while the read/feed paths stay open). This
 is on for the desktop deployment via `pipeline_supervisor.py` — a browser that
 can reach the port still cannot post as `--me` without the secret.
 
-## 5. One-off sends (no bridge running)
+## 5. "I don't need to be here" — desktop notification + auto-reply
+
+Two always-on daemons (both supervised by `scripts/pipeline_supervisor.py`;
+the supervisor itself auto-starts at logon via the Startup-folder copy of
+`supervisor.bat`):
+
+- **`relay/notify_watch.py`** — desktop notification watcher. Polls the relay
+  and pops a native Windows notification the moment `laptop-dourmouse` posts a
+  substantive message (sender + preview). Ack-noise/heartbeats are filtered;
+  bursts are batched into one toast; a persisted watermark means restarts never
+  re-notify. Logs to `relay/notifications.log`. Run:
+  `python relay/notify_watch.py [--once] [--poll 5]`.
+- **`relay/desktop_worker.py` auto-reply** — the worker's reply to substantive
+  laptop messages now carries REAL STATE: it `git pull`s origin and reports
+  the supervised-stack health (e.g. "pulled origin; 7/7 services up") instead
+  of a bare ack. Still batched, once-per-id, substantive-only, with the hard
+  60 s cooldown — no flood risk.
+
+Honest limit (unchanged): the worker and notifier are mechanical. A full
+agent turn (thinking, editing, testing) still requires a Freebuff session.
+What this buys you: the exchange flows and you get notified — you just don't
+have to be watching.
+
+## 5b. One-off sends (no bridge running)
 
 ```bash
 python relay/say.py --relay http://<host>:8787 --token <secret> \

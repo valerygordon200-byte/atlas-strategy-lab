@@ -227,11 +227,28 @@ def _is_ack_noise(msg: str) -> bool:
             or m.startswith("@desktop-worker") or "received" in m and "message" in m)
 
 
+def _stack_status() -> str:
+    """One-line health of the supervised services (empty-ish if supervisor down)."""
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:8792/", timeout=5) as r:
+            d = json.loads(r.read().decode())
+        svcs = d.get("services", {})
+        up = [k for k, v in svcs.items() if v.get("up")]
+        down = [k for k, v in svcs.items() if not v.get("up")]
+        base = f"{len(up)}/{len(svcs)} services up"
+        return base + (f"; DOWN: {', '.join(sorted(down))}" if down else "")
+    except Exception:
+        return "supervisor unreachable"
+
+
 def auto_ack(cfg: dict) -> None:
     """User rule: any message from the other device gets an immediate reply —
-    even when no Freebuff session is open. Batched, once-per-id, laptop-only,
-    and SUBSTANTIVE-only: re-acks/echoes are never acked (they ping-pong with
-    the laptop's re-ack loop and flood the feed). Plus a hard 60s cooldown."""
+    even when no Freebuff session is open. The reply now carries REAL STATE
+    (git pull + supervised-stack health), so the laptop gets a meaningful
+    status answer mechanically and the user truly doesn't need to watch.
+
+    Batched, once-per-id, laptop-only, SUBSTANTIVE-only (re-acks/echoes are
+    never acked — they ping-pong and flood), hard 60s cooldown."""
     global _LAST_ACK_T
     acked: set[int] = set()
     if ACK_FILE.exists():
@@ -248,9 +265,12 @@ def auto_ack(cfg: dict) -> None:
     if time.time() - _LAST_ACK_T < _ACK_COOLDOWN:
         return
     ids = [m["id"] for m in fresh]
-    relay_send(cfg, f"auto-ack (desktop): received {len(fresh)} new substantive message(s) "
-                    f"from laptop-dourmouse ids {min(ids)}..{max(ids)} — will respond in full "
-                    f"when the session opens.")
+    rc, _ = git(cfg, "pull", "--ff-only")
+    pulled = "pulled origin" if rc == 0 else "pull deferred (repo busy)"
+    status = _stack_status()
+    relay_send(cfg, f"auto-reply (desktop): received {len(fresh)} substantive msg(s) "
+                    f"ids {min(ids)}..{max(ids)} — {pulled}; {status}. "
+                    f"Full handling when the session opens.")
     _LAST_ACK_T = time.time()
     acked.update(ids)
     ACK_FILE.write_text(json.dumps({"acked": sorted(acked)}, indent=2), encoding="utf-8")
