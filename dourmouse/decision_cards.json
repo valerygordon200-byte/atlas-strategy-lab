@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-11T18:01:22Z",
+  "generated": "2026-08-11T18:05:21Z",
   "mode": "default-demo",
   "graveyard": {
     "count": 17
@@ -7,13 +7,13 @@
   "cards": [
     {
       "id": "dc-demo-001",
-      "ts": "2026-08-11T18:01:22Z",
+      "ts": "2026-08-11T18:05:21Z",
       "signal": "usdjpy_drift_k1",
       "asset": "USDJPY",
       "direction": "LONG",
       "size": 0.1,
-      "mechanism": "News-driven drift persists for ~4 sessions; the forced participant is the retail crowd fading the first move.",
-      "forced_participant": "retail crowd fading the initial spike",
+      "mechanism": "News-driven drift persists for ~4 sessions; the forced participant is the market itself \u2014 it under-reacts to a genuine surprise.",
+      "forced_participant": "none forced \u2014 informed under-reaction to a genuine surprise",
       "data_refs": [
         "USDJPY_D1",
         "event_bank_news"
@@ -24,7 +24,7 @@
       "ledger_ref": null,
       "chain": [
         "signal: drift detected on USDJPY (k=1)",
-        "mechanism: forced participant is the retail crowd fading the move",
+        "mechanism: under-reaction to a genuine surprise \u2014 the move continues ~4 sessions",
         "data: USDJPY_D1 + event bank \u2014 210 sessions",
         "p: 0.0007 (permutation)",
         "outcome: awaiting your approval \u2014 HITL (verdict #5)"
@@ -32,7 +32,7 @@
     },
     {
       "id": "dc-demo-002",
-      "ts": "2026-08-11T18:01:22Z",
+      "ts": "2026-08-11T18:05:21Z",
       "signal": "dual_momentum_k1",
       "asset": "GC_FUT",
       "direction": "LONG",
@@ -56,7 +56,7 @@
     },
     {
       "id": "dc-demo-003",
-      "ts": "2026-08-11T18:01:22Z",
+      "ts": "2026-08-11T18:05:21Z",
       "signal": "central_bank_net_buying",
       "asset": "GOLD",
       "direction": "HOLD",

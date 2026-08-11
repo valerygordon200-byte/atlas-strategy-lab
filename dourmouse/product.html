@@ -144,10 +144,10 @@
 // ---- embedded fallback demo (used if decision_cards.json is unreachable) ----
 const DEMO_CARDS = [
   {id:"dc-demo-001",ts:"",signal:"usdjpy_drift_k1",asset:"USDJPY",direction:"LONG",size:0.1,
-   mechanism:"News-driven drift persists for ~4 sessions; the forced participant is the retail crowd fading the first move.",
-   forced_participant:"retail crowd fading the initial spike",data_refs:["USDJPY_D1"],p_value:0.0007,
+   mechanism:"The market under-reacts to a genuine surprise (survey consensus beat/miss): the move continues over ~4 sessions.",
+   forced_participant:"none forced — informed under-reaction to a genuine surprise",data_refs:["USDJPY_D1"],p_value:0.0007,
    outcome:"PENDING_APPROVAL",guardrail:null,ledger_ref:null,
-   chain:["signal: drift detected on USDJPY (k=1)","mechanism: forced participant is the retail crowd fading the move",
+   chain:["signal: drift detected on USDJPY (k=1)","mechanism: under-reaction to a genuine surprise — the move continues ~4 sessions",
           "data: USDJPY_D1 + event bank — 210 sessions","p: 0.0007 (permutation)",
           "outcome: awaiting your approval — HITL (verdict #5)"]},
   {id:"dc-demo-002",ts:"",signal:"dual_momentum_k1",asset:"GC_FUT",direction:"LONG",size:0.05,
@@ -208,8 +208,8 @@ function renderCard(c){
     </ul>
     ${c.outcome==="PENDING_APPROVAL"
       ? `<div class="approve-row">
-           <button class="approve" onclick="approve(this,'${c.id}')">APPROVE</button>
-           <button class="reject" onclick="reject(this,'${c.id}')">REJECT</button>
+           <button class="approve" onclick="approve(this,'${esc(c.id)}')">APPROVE</button>
+           <button class="reject" onclick="reject(this,'${esc(c.id)}')">REJECT</button>
            <span style="align-self:center;color:var(--dead);font-size:10px">HITL — you are the gate (verdict #5)</span>
          </div>` : ""}
     ${calm?`<div style="font-size:10px;color:var(--dead);margin-top:8px">calm state — a first-class outcome, not dead space (+2)</div>`:""}

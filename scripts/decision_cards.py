@@ -43,13 +43,13 @@ def _demo_cards() -> list[dict]:
             "signal": "usdjpy_drift_k1", "asset": "USDJPY", "direction": "LONG",
             "size": 0.1,
             "mechanism": "News-driven drift persists for ~4 sessions; the forced "
-                         "participant is the retail crowd fading the first move.",
-            "forced_participant": "retail crowd fading the initial spike",
+                         "participant is the market itself — it under-reacts to a genuine surprise.",
+            "forced_participant": "none forced — informed under-reaction to a genuine surprise",
             "data_refs": ["USDJPY_D1", "event_bank_news"], "p_value": 0.0007,
             "outcome": "PENDING_APPROVAL", "guardrail": None, "ledger_ref": None,
             "chain": [
                 "signal: drift detected on USDJPY (k=1)",
-                "mechanism: forced participant is the retail crowd fading the move",
+                "mechanism: under-reaction to a genuine surprise — the move continues ~4 sessions",
                 "data: USDJPY_D1 + event bank — 210 sessions",
                 "p: 0.0007 (permutation)",
                 "outcome: awaiting your approval — HITL (verdict #5)",
