@@ -66,6 +66,22 @@ def fr_monthly(fname):
     return df.resample("ME").last()
 
 
+def cb_gold_monthly():
+    """Central-bank net gold purchases (tonnes) — monthly mean of the daily/weekly
+    CSV the laptop delivers (T1). Graceful: returns empty until the file lands."""
+    p = BASE / "market-data/fundamentals" / "central_bank_gold.csv"
+    if not p.exists():
+        return pd.Series(dtype=float)
+    df = pd.read_csv(p)
+    dcol = "date" if "date" in df.columns else "observation_date"
+    vcol = "total_net_purchases_tonnes" if "total_net_purchases_tonnes" in df.columns         else (df.columns[1] if df.shape[1] > 1 else None)
+    if vcol is None:
+        return pd.Series(dtype=float)
+    df[dcol] = pd.to_datetime(df[dcol])
+    s = df.set_index(dcol)[vcol].astype(float)
+    return s.resample("ME").mean().rename("central_bank_net_buying")
+
+
 def policy_rates_monthly():
     df = pd.read_csv(BASE / "market-data/rates/policy_rates.csv", parse_dates=["date"])
     df = df.set_index("date")
@@ -157,7 +173,12 @@ def main():
     rows = []
     for asset in FACTOR_SETS:
         y = monthly_asset_ret(asset)
+        cb_gold = cb_gold_monthly()
+        if (not cb_gold.empty and asset == "GOLD"
+                and "central_bank_net_buying" not in FACTOR_SETS[asset]):
+            FACTOR_SETS[asset] = ["central_bank_net_buying"] + FACTOR_SETS[asset]
         fmap = {"real_yield_10y": d_real_yield, "usd_basket": dxy,
+                "central_bank_net_buying": cb_gold,
                 "policy_rate_us": rates["USD"].diff(),
                 "usd_cpi_surprise_z": us_cpi_z, "eur_cpi_surprise_z": eur_cpi_z,
                 "gbp_cpi_surprise_z": gbp_cpi_z, "aud_cpi_surprise_z": aud_cpi_z,
