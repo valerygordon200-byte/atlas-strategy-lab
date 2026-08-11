@@ -112,7 +112,26 @@ def bt_registry_gates(params: dict) -> dict:
             "runtime_s": round(time.time() - t0, 2)}
 
 
-BACKTESTS = {"usdjpy_drift_k1": bt_usdjpy_drift_k1, "registry_gates": bt_registry_gates}
+def bt_golden(params: dict) -> dict:
+    """T10 release gate: run the golden regression suite (3 locked results)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "golden_regressions",
+        str(DATA_DIR / "golden_regressions.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    t0 = time.time()
+    checks = [mod.check_hog(), mod.check_drift(), mod.check_dual_momentum()]
+    all_ok = all(c["ok"] for c in checks)
+    return {"backtest": "golden_regressions", "params": params,
+            "all_pass": all_ok,
+            "checks": [{"name": c["name"], "ok": c["ok"],
+                        "detail": c["detail"], "gate": c["gate"]} for c in checks],
+            "runtime_s": round(time.time() - t0, 2)}
+
+
+BACKTESTS = {"usdjpy_drift_k1": bt_usdjpy_drift_k1, "registry_gates": bt_registry_gates,
+             "golden_regressions": bt_golden}
 
 
 # ---- HTTP ----------------------------------------------------------------

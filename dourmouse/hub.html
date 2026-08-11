@@ -88,13 +88,19 @@
 <main>
   <!-- ================= ATLAS ================= -->
   <section class="pane active" id="pane-atlas">
-    <div class="row">
+    <div class="row" style="margin-bottom:8px">
+    <div class="card" style="flex:1">
+      <h3>PIPELINE (supervisor :8792)</h3>
+      <div id="svcs" style="font-size:12px;letter-spacing:1px">loading…</div>
+    </div>
+  </div>
+  <div class="row">
       <div class="card"><h3>REGISTRY KEYS</h3>
         <div class="big" id="kKeys">—</div><div class="sub" id="kKeysSub">loading…</div></div>
       <div class="card"><h3>DATA COVERAGE</h3>
         <div class="big" id="kOk">—</div><div class="sub">keys passing quality gates</div></div>
       <div class="card"><h3>ENGINE</h3>
-        <div class="big" id="kBt">2</div><div class="sub">registered backtests</div></div>
+        <div class="big" id="kBt">3</div><div class="sub">registered backtests</div></div>
     </div>
     <div class="row">
       <div class="card" style="flex:1; min-width:340px">
@@ -103,6 +109,8 @@
         <button id="btDrift">run usdjpy_drift_k1</button>
         <span style="padding:0 8px"></span>
         <button id="btGates">run registry_gates</button>
+        <span style="padding:0 8px"></span>
+        <button id="btGold" style="color:var(--gold)">run golden_regressions</button>
         <pre id="btOut" style="margin-top:10px">—</pre>
       </div>
       <div class="card" style="flex:1; min-width:340px">
@@ -184,6 +192,19 @@ async function runBt(id, btn) {
 }
 document.getElementById("btDrift").addEventListener("click", e => runBt("usdjpy_drift_k1", e.target));
 document.getElementById("btGates").addEventListener("click", e => runBt("registry_gates", e.target));
+document.getElementById("btGold").addEventListener("click", e => runBt("golden_regressions", e.target));
+
+// pipeline health
+async function svcs() {
+  const el = document.getElementById("svcs");
+  try {
+    const r = await fetch("http://127.0.0.1:8792/");
+    const d = await r.json();
+    el.innerHTML = Object.entries(d.services).map(([n, s]) =>
+      `<span style="color:${s.up ? "var(--cyan)" : "var(--red)"}">${s.up ? "●" : "○"} ${n}${s.restarts ? " ⚠" + s.restarts : ""}</span>`).join(" &nbsp; ");
+  } catch (e) { el.textContent = "supervisor unreachable"; }
+}
+svcs(); setInterval(svcs, 15000);
 
 // ---- data inspector ----
 document.getElementById("btData").addEventListener("click", async () => {
