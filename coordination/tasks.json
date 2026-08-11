@@ -34,6 +34,97 @@
       "done": "2026-08-11T14:56:35+00:00",
       "cmd": "python scripts/coord.py list",
       "dispatch": null
+    },
+    {
+      "id": "T4",
+      "text": "C1: Commercial spec \u2014 define concrete acceptance criteria for commercial level (uptime, auth, packaging, docs, risk guardrails, reporting); write reports/COMMERCIAL_SPEC.md; laptop reviews it",
+      "priority": "high",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T15:14:47+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
+      "cmd": null,
+      "dispatch": null
+    },
+    {
+      "id": "T5",
+      "text": "C2: Atlas engine as callable service \u2014 CLI + HTTP API over data_registry so dourmouse UI can run backtests programmatically; endpoints for load(key), run-battery, results",
+      "priority": "high",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T15:14:47+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
+      "cmd": null,
+      "dispatch": null
+    },
+    {
+      "id": "T6",
+      "text": "C3: dourmouse execution layer audit \u2014 which broker connectors (MT5/IBKR/T212) are live vs stubbed; paper path must execute real demo fills; report per connector",
+      "priority": "high",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T15:14:48+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
+      "cmd": null,
+      "dispatch": null
+    },
+    {
+      "id": "T7",
+      "text": "C4: Chat feed + relay hardening \u2014 token-gated dashboard send, message archive rotation, uptime heartbeat broadcast every 5 min; laptop tests from Mac",
+      "priority": "mid",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T15:14:48+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
+      "cmd": null,
+      "dispatch": null
+    },
+    {
+      "id": "T8",
+      "text": "C5: Live data pipeline supervisor \u2014 one script keeping collector/event-pipeline/ledger/worker alive with restart-on-crash + status endpoint on the desktop",
+      "priority": "mid",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T15:14:48+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
+      "cmd": null,
+      "dispatch": null
+    },
+    {
+      "id": "T9",
+      "text": "C6: Commercial packaging \u2014 overhaul README, one-command setup on any fresh machine, LICENSE, deployment doc for the full stack (engine + data + relay + chat)",
+      "priority": "mid",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T15:14:48+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
+      "cmd": null,
+      "dispatch": null
+    },
+    {
+      "id": "T10",
+      "text": "C7: Golden regression suite \u2014 one script running the three confirmed regressions (hog roll-check, USDJPY drift, dual momentum) and failing loudly on any drift",
+      "priority": "mid",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T15:14:48+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
+      "cmd": null,
+      "dispatch": null
     }
   ],
   "log": [
@@ -76,6 +167,55 @@
       "event": "done",
       "id": "T2",
       "result": "Unified ingest registry built (data_registry.py + registry.json + gates); both event loaders migrated; drift regression holds (OOS t 3.711); report reports/T2_INGEST_REGISTRY.md"
+    },
+    {
+      "t": "2026-08-11T15:14:47+00:00",
+      "who": "desktop-atlas",
+      "event": "new",
+      "id": "T4",
+      "text": "C1: Commercial spec \u2014 define concrete acceptance criteria for commercial level (uptime, auth, packaging, docs, risk guardrails, reporting); write reports/COMMERCIAL_SPEC.md; laptop reviews it"
+    },
+    {
+      "t": "2026-08-11T15:14:47+00:00",
+      "who": "desktop-atlas",
+      "event": "new",
+      "id": "T5",
+      "text": "C2: Atlas engine as callable service \u2014 CLI + HTTP API over data_registry so dourmouse UI can run backtests programmatically; endpoints for load(key), run-battery, results"
+    },
+    {
+      "t": "2026-08-11T15:14:48+00:00",
+      "who": "laptop-dourmouse",
+      "event": "new",
+      "id": "T6",
+      "text": "C3: dourmouse execution layer audit \u2014 which broker connectors (MT5/IBKR/T212) are live vs stubbed; paper path must execute real demo fills; report per connector"
+    },
+    {
+      "t": "2026-08-11T15:14:48+00:00",
+      "who": "laptop-dourmouse",
+      "event": "new",
+      "id": "T7",
+      "text": "C4: Chat feed + relay hardening \u2014 token-gated dashboard send, message archive rotation, uptime heartbeat broadcast every 5 min; laptop tests from Mac"
+    },
+    {
+      "t": "2026-08-11T15:14:48+00:00",
+      "who": "desktop-atlas",
+      "event": "new",
+      "id": "T8",
+      "text": "C5: Live data pipeline supervisor \u2014 one script keeping collector/event-pipeline/ledger/worker alive with restart-on-crash + status endpoint on the desktop"
+    },
+    {
+      "t": "2026-08-11T15:14:48+00:00",
+      "who": "laptop-dourmouse",
+      "event": "new",
+      "id": "T9",
+      "text": "C6: Commercial packaging \u2014 overhaul README, one-command setup on any fresh machine, LICENSE, deployment doc for the full stack (engine + data + relay + chat)"
+    },
+    {
+      "t": "2026-08-11T15:14:48+00:00",
+      "who": "desktop-atlas",
+      "event": "new",
+      "id": "T10",
+      "text": "C7: Golden regression suite \u2014 one script running the three confirmed regressions (hog roll-check, USDJPY drift, dual momentum) and failing loudly on any drift"
     }
   ]
 }
