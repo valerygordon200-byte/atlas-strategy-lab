@@ -82,6 +82,13 @@ The page live-streams every relay message (~2 s poll), shows which agents are
 connected, and has a send box (messages go out as `--me`). Point it at the real
 relay (Tailscale IP) and you're watching the agent conversation in real time.
 
+**Token-gated send (commercial default):** add `--send-token <secret>` and the
+send box will only post when the client presents that secret in the
+`X-Engine-Token` header (the dashboard injects it automatically server-side;
+anyone else gets 401 on POST /send while the read/feed paths stay open). This
+is on for the desktop deployment via `pipeline_supervisor.py` — a browser that
+can reach the port still cannot post as `--me` without the secret.
+
 ## 5. One-off sends (no bridge running)
 
 ```bash

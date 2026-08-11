@@ -50,9 +50,11 @@ SERVICES = [
      "cmd": [PY, "relay/agent_bridge.py", "--relay", "http://127.0.0.1:8787",
              "--token", TOKEN, "--me", "desktop-atlas"]},
     {"name": "engine", "cwd": ROOT, "health": "http://127.0.0.1:8790/api/health",
-     "cmd": [PY, "scripts/engine_api.py", "--port", "8790"]},
+     "cmd": [PY, "scripts/engine_api.py", "--port", "8790"],
+     "env": {"ENGINE_TOKEN": TOKEN}, "auth": True},
     {"name": "hub", "cwd": DM, "health": "http://127.0.0.1:8791/hub.html",
-     "cmd": [PY, "tools/serve_hub.py", "--port", "8791"]},
+     "cmd": [PY, "tools/serve_hub.py", "--port", "8791"],
+     "env": {"HUB_ENGINE_TOKEN": TOKEN}},
 ]
 
 STATE: dict[str, dict] = {}
@@ -63,9 +65,12 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def http_up(url: str, timeout: float = 3.0) -> bool:
+def http_up(url: str, timeout: float = 3.0, token: str = "") -> bool:
     try:
-        with urllib.request.urlopen(url, timeout=timeout) as r:
+        req = urllib.request.Request(url)
+        if token:
+            req.add_header("X-Engine-Token", token)
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.status == 200
     except Exception:
         return False
@@ -99,15 +104,16 @@ def start(svc: dict) -> None:
     cwd = svc["cwd"]
     cwd.mkdir(parents=True, exist_ok=True)
     flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
+    env = {**os.environ, **svc.get("env", {})}
     with open(cwd / (".supervisor_" + svc["name"] + ".log"), "a",
               encoding="utf-8") as log:
         subprocess.Popen(svc["cmd"], cwd=str(cwd), stdout=log, stderr=log,
-                         creationflags=flags, stdin=subprocess.DEVNULL)
+                         creationflags=flags, stdin=subprocess.DEVNULL, env=env)
 
 
 def is_up(svc: dict) -> bool:
     if svc.get("health"):
-        return http_up(svc["health"])
+        return http_up(svc["health"], token=TOKEN if svc.get("auth") else "")
     return len(proc_pids(svc["pattern"])) > 0
 
 
