@@ -42,11 +42,15 @@ def port_open(host: str, port: int, timeout: float = 2.0) -> bool:
 def say(text: str) -> None:
     payload = json.dumps({"token": TOKEN, "from": ME, "msg": text}).encode()
     req = urllib.request.Request(RELAY + "/send", data=payload, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=10) as r:
-            print(f"[relay] {r.read().decode()}", flush=True)
-    except Exception as e:  # noqa: BLE001
-        print(f"[relay] send failed: {e}", flush=True)
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                print(f"[relay] {r.read().decode()}", flush=True)
+                return
+        except Exception as e:  # noqa: BLE001
+            print(f"[relay] send failed (attempt {attempt + 1}/4): {e}", flush=True)
+            time.sleep(5)
+    print("[relay] GAVE UP after 4 attempts", flush=True)
 
 
 def run_check() -> bool:
