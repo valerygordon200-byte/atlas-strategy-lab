@@ -31,12 +31,20 @@ DATA HOST (desktop)                    CLIENT (laptop)
 ```bash
 cd atlas-strategy-lab
 cp relay/relay_config.example.txt relay/relay_config.txt   # edit URLs/token/ME
-python3 scripts/health_check.py                            # verifies everything
+
+# point at the machine's data root (defaults to E:/forex-data on the desktop)
+python3 scripts/health_check.py --base /path/to/market-data-root
 ```
 
-`health_check.py` prints per-component OK/FAIL (repo, registry, bookshelf,
-regressions, relay, engine, gold data) and exits non-zero on breakage —
-that's the C7 release gate's first stop.
+`health_check.py` runs the four smoke steps — registry regenerate, logical-key
+count, core-series quality gates (FX d1 / events archive / a commodity), and
+the golden-regression suite (hog + USDJPY drift + dual momentum) — printing
+per-step PASS/FAIL and exiting non-zero on any breakage. That's the C7 release
+gate's first stop. `BASE` can also be set via `$DOURMOUSE_BASE`.
+
+> Note: the relay + engine + hub are separate long-running processes, not
+> exercised by `health_check.py`; verify them with their own status endpoints
+> (engine `/api/health`, supervisor on :8792).
 
 ## Role: data host (desktop)
 

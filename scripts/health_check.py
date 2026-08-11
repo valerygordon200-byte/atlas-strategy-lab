@@ -8,15 +8,25 @@
 Exit 0 only if everything passes. Used by setup.bat/setup.sh as the
 definition-of-done smoke gate (commercial spec §2A / §4).
 
-Run:  python scripts/health_check.py
+Portable: the data root (BASE) is taken from --base / $DOURMOUSE_BASE, falling
+back to E:/forex-data (the desktop's default) so existing invocations keep
+working. This satisfies the spec §G 'fresh machine' criterion — run it on
+any machine that has the market-data tree.
+
+Run:  python scripts/health_check.py [--base /path/to/market-data-root]
 """
 from __future__ import annotations
 
+import argparse
+import os
 import sys
 import time
 from pathlib import Path
 
-BASE = Path("E:/forex-data")
+_ap = argparse.ArgumentParser(add_help=False)
+_ap.add_argument("--base", default=None)
+_args, _ = _ap.parse_known_args()
+BASE = Path(_args.base or os.environ.get("DOURMOUSE_BASE") or "E:/forex-data")
 sys.path.insert(0, str(BASE / "scripts"))
 
 fails: list[str] = []
