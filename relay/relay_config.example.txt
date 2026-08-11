@@ -1,0 +1,17 @@
+# Relay configuration — copy this file to relay_config.txt and fill in the values.
+# relay_config.txt is git-ignored (never commit secrets).
+#
+# RELAY_URL = where the relay server runs (Tailscale IP preferred):
+#   http://100.x.y.z:8787   (Tailscale — same tailnet, any network)
+#   http://192.168.1.95:8787 (same LAN)
+#   https://xxxx.trycloudflare.com (public tunnel — less secure)
+RELAY_URL=http://100.64.0.1:8787
+
+# Shared secret — must match the one used to start the relay.
+TOKEN=change-me
+
+# Identity of THIS machine's agent.
+ME=desktop-atlas
+
+# Chat dashboard port (this machine).
+DASH_PORT=8788
