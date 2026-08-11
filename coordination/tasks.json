@@ -4,12 +4,12 @@
       "id": "T1",
       "text": "Source central-bank gold net-purchase series (2015-present, monthly) from WGC/IMF/national disclosures; add to bookshelf; re-run weight_calibrator for GOLD",
       "priority": "high",
-      "status": "TODO",
-      "owner": null,
+      "status": "DONE",
+      "owner": "desktop-atlas",
       "created": "2026-08-11T00:00:00+00:00",
       "claimed": null,
-      "result": "Milestone 2 delivered: monthly reported net-purchase grid Nov2020-Jun2026 (58 verified months, WGC monthly reports, row-by-row audited; annual 2014-2025 companion). data/central_bank_gold_monthly.csv + provenance README + scripts/gold_monthly_build.py pushed to main. Bookshelf wiring + weight_calibrator for GOLD = desktop step (awaiting).",
-      "done": null
+      "result": "Central-bank gold net purchases wired into GOLD: weight_calibrator reads the monthly WGC series (Nov 2020-Jun 2026, 55 obs) \u2014 central_bank_net_buying calibrated (hist 0.181, final 0.248, beta +0.144 t=1.08, mechanism-consistent sign). Golden regressions all pass.",
+      "done": "2026-08-11T16:06:03+00:00"
     },
     {
       "id": "T2",
@@ -271,6 +271,13 @@
       "event": "done",
       "id": "T7",
       "result": "C4 hardening: token-gated dashboard send + heartbeat; desktop shipped engine/hub gating (merged on main)"
+    },
+    {
+      "t": "2026-08-11T16:06:03+00:00",
+      "who": "desktop-atlas",
+      "event": "done",
+      "id": "T1",
+      "result": "Central-bank gold net purchases wired into GOLD: weight_calibrator reads the monthly WGC series (Nov 2020-Jun 2026, 55 obs) \u2014 central_bank_net_buying calibrated (hist 0.181, final 0.248, beta +0.144 t=1.08, mechanism-consistent sign). Golden regressions all pass."
     }
   ]
 }
