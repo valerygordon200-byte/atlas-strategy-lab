@@ -91,12 +91,12 @@
       "id": "T8",
       "text": "C5: Live data pipeline supervisor \u2014 one script keeping collector/event-pipeline/ledger/worker alive with restart-on-crash + status endpoint on the desktop",
       "priority": "mid",
-      "status": "TODO",
-      "owner": null,
+      "status": "DONE",
+      "owner": "desktop-atlas",
       "created": "2026-08-11T15:14:48+00:00",
       "claimed": null,
-      "result": null,
-      "done": null,
+      "result": "Pipeline supervisor (scripts/pipeline_supervisor.py) on :8792: supervises relay/feed/worker/bridge/engine/hub \u2014 all 6 up, exactly 1 each, crash-recovery verified live (killed hub, restarted within 15s); restart announcements to the relay",
+      "done": "2026-08-11T15:38:27+00:00",
       "cmd": null,
       "dispatch": null
     },
@@ -117,12 +117,12 @@
       "id": "T10",
       "text": "C7: Golden regression suite \u2014 one script running the three confirmed regressions (hog roll-check, USDJPY drift, dual momentum) and failing loudly on any drift",
       "priority": "mid",
-      "status": "TODO",
-      "owner": null,
+      "status": "DONE",
+      "owner": "desktop-atlas",
       "created": "2026-08-11T15:14:48+00:00",
       "claimed": null,
-      "result": null,
-      "done": null,
+      "result": "Golden regression suite (scripts/golden_regressions.py): 3 locked results recomputed in 1.9s \u2014 hog raw -13.62% t-7.53 vs real path -0.03% t-0.02 (PASS), USDJPY drift OOS t 3.711 (PASS), dual momentum +2.12%/mo t 4.49 (PASS). ALL GATES PASS, exit 0; FAIL = release blocker",
+      "done": "2026-08-11T15:38:26+00:00",
       "cmd": null,
       "dispatch": null
     }
@@ -230,6 +230,20 @@
       "event": "done",
       "id": "T5",
       "result": "Atlas engine HTTP service (scripts/engine_api.py) on :8790: /api/health, /api/keys (100), /api/data/{key}, POST /api/backtest with usdjpy_drift_k1 (reproduces OOS t 3.711 through the API) + registry_gates (91/9); token-gated option; stdlib-only"
+    },
+    {
+      "t": "2026-08-11T15:38:26+00:00",
+      "who": "desktop-atlas",
+      "event": "done",
+      "id": "T10",
+      "result": "Golden regression suite (scripts/golden_regressions.py): 3 locked results recomputed in 1.9s \u2014 hog raw -13.62% t-7.53 vs real path -0.03% t-0.02 (PASS), USDJPY drift OOS t 3.711 (PASS), dual momentum +2.12%/mo t 4.49 (PASS). ALL GATES PASS, exit 0; FAIL = release blocker"
+    },
+    {
+      "t": "2026-08-11T15:38:27+00:00",
+      "who": "desktop-atlas",
+      "event": "done",
+      "id": "T8",
+      "result": "Pipeline supervisor (scripts/pipeline_supervisor.py) on :8792: supervises relay/feed/worker/bridge/engine/hub \u2014 all 6 up, exactly 1 each, crash-recovery verified live (killed hub, restarted within 15s); restart announcements to the relay"
     }
   ]
 }
