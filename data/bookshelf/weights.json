@@ -1,0 +1,355 @@
+{
+  "generated": "2026-08-11",
+  "method": "monthly std-OLS; 0.4*design + 0.6*hist; IS 2016-08..2021-12, OOS 2022-01..2026-08",
+  "assets": {
+    "GOLD": {
+      "n_months": 117,
+      "r2_full": 0.268,
+      "factors": {
+        "real_yield_10y": {
+          "design": 0.25,
+          "hist": 0.18483293792526034,
+          "beta": -0.13,
+          "t": -1.41,
+          "sign_stable_oos": false,
+          "weight_final": 0.174
+        },
+        "usd_basket": {
+          "design": 0.2,
+          "hist": 0.6372160740620889,
+          "beta": -0.449,
+          "t": -5.0,
+          "sign_stable_oos": true,
+          "weight_final": 0.382
+        },
+        "usd_cpi_surprise_z": {
+          "design": 0.1,
+          "hist": 0.05280362856355978,
+          "beta": 0.037,
+          "t": 0.46,
+          "sign_stable_oos": false,
+          "weight_final": 0.059
+        },
+        "policy_rate_us": {
+          "design": 0.1,
+          "hist": 0.12514735944909083,
+          "beta": -0.088,
+          "t": -1.03,
+          "sign_stable_oos": false,
+          "weight_final": 0.095
+        },
+        "central_bank_net_buying": {
+          "design": 0.35,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.289
+        }
+      }
+    },
+    "SILVER": {
+      "n_months": 117,
+      "r2_full": 0.249,
+      "factors": {
+        "real_yield_10y": {
+          "design": 0.2,
+          "hist": 0.08562590167677775,
+          "beta": 0.058,
+          "t": 0.62,
+          "sign_stable_oos": false,
+          "weight_final": 0.099
+        },
+        "usd_basket": {
+          "design": 0.15,
+          "hist": 0.7697403578076526,
+          "beta": -0.518,
+          "t": -5.7,
+          "sign_stable_oos": true,
+          "weight_final": 0.392
+        },
+        "usd_cpi_surprise_z": {
+          "design": 0.1,
+          "hist": 0.09205086352938971,
+          "beta": 0.062,
+          "t": 0.75,
+          "sign_stable_oos": false,
+          "weight_final": 0.072
+        },
+        "policy_rate_us": {
+          "design": 0.0,
+          "hist": 0.052582876986179854,
+          "beta": 0.035,
+          "t": 0.41,
+          "sign_stable_oos": false,
+          "weight_final": 0.024
+        },
+        "gold_silver_ratio_reversion": {
+          "design": 0.3,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.226
+        },
+        "industrial_demand_cycle": {
+          "design": 0.25,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.188
+        }
+      }
+    },
+    "OIL": {
+      "n_months": 120,
+      "r2_full": 0.094,
+      "factors": {
+        "inventory_surprise_z": {
+          "design": 0.35,
+          "hist": 0.03605809682825368,
+          "beta": 0.015,
+          "t": 0.17,
+          "sign_stable_oos": true,
+          "weight_final": 0.134
+        },
+        "usd_basket": {
+          "design": 0.2,
+          "hist": 0.29780777211606274,
+          "beta": -0.122,
+          "t": -1.37,
+          "sign_stable_oos": false,
+          "weight_final": 0.214
+        },
+        "policy_rate_us": {
+          "design": 0.1,
+          "hist": 0.6661341310556835,
+          "beta": 0.272,
+          "t": 3.07,
+          "sign_stable_oos": false,
+          "weight_final": 0.363
+        },
+        "opec_supply_regime": {
+          "design": 0.25,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.207
+        },
+        "api_crude_surprise_z": {
+          "design": 0.1,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.083
+        }
+      }
+    },
+    "USDJPY": {
+      "n_months": 119,
+      "r2_full": 0.506,
+      "factors": {
+        "rate_differential_us_jp": {
+          "design": 0.3,
+          "hist": 0.09020532286783743,
+          "beta": 0.078,
+          "t": 1.19,
+          "sign_stable_oos": false,
+          "weight_final": 0.148
+        },
+        "usd_basket": {
+          "design": 0.0,
+          "hist": 0.8279221122190226,
+          "beta": 0.72,
+          "t": 10.84,
+          "sign_stable_oos": true,
+          "weight_final": 0.421
+        },
+        "usd_cpi_surprise_z_drift": {
+          "design": 0.4,
+          "hist": 0.08187256491313995,
+          "beta": -0.071,
+          "t": -1.07,
+          "sign_stable_oos": true,
+          "weight_final": 0.177
+        },
+        "risk_regime": {
+          "design": 0.2,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.169
+        },
+        "boj_intervention": {
+          "design": 0.1,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.085
+        }
+      }
+    },
+    "EURUSD": {
+      "n_months": 119,
+      "r2_full": 0.784,
+      "factors": {
+        "rate_differential_us_eur": {
+          "design": 0.4,
+          "hist": 0.0628757539374794,
+          "beta": -0.063,
+          "t": -1.43,
+          "sign_stable_oos": true,
+          "weight_final": 0.181
+        },
+        "usd_basket": {
+          "design": 0.0,
+          "hist": 0.8801073125293534,
+          "beta": -0.885,
+          "t": -19.91,
+          "sign_stable_oos": true,
+          "weight_final": 0.484
+        },
+        "usd_cpi_surprise_z": {
+          "design": 0.2,
+          "hist": 0.04531589510937112,
+          "beta": -0.046,
+          "t": -1.03,
+          "sign_stable_oos": true,
+          "weight_final": 0.098
+        },
+        "eur_cpi_surprise_z": {
+          "design": 0.25,
+          "hist": 0.01170103842379618,
+          "beta": 0.012,
+          "t": 0.27,
+          "sign_stable_oos": true,
+          "weight_final": 0.098
+        },
+        "risk_regime": {
+          "design": 0.15,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.138
+        }
+      }
+    },
+    "GBPUSD": {
+      "n_months": 119,
+      "r2_full": 0.651,
+      "factors": {
+        "rate_differential_us_gbp": {
+          "design": 0.4,
+          "hist": 0.016992904694477853,
+          "beta": -0.015,
+          "t": -0.27,
+          "sign_stable_oos": false,
+          "weight_final": 0.156
+        },
+        "usd_basket": {
+          "design": 0.0,
+          "hist": 0.9265371786356893,
+          "beta": -0.812,
+          "t": -14.42,
+          "sign_stable_oos": true,
+          "weight_final": 0.51
+        },
+        "usd_cpi_surprise_z": {
+          "design": 0.2,
+          "hist": 0.03959867071798113,
+          "beta": 0.035,
+          "t": 0.61,
+          "sign_stable_oos": true,
+          "weight_final": 0.095
+        },
+        "gbp_cpi_surprise_z": {
+          "design": 0.25,
+          "hist": 0.016871245951851823,
+          "beta": 0.015,
+          "t": 0.26,
+          "sign_stable_oos": false,
+          "weight_final": 0.101
+        },
+        "risk_regime": {
+          "design": 0.15,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.138
+        }
+      }
+    },
+    "AUDUSD": {
+      "n_months": 32,
+      "r2_full": 0.722,
+      "factors": {
+        "rate_differential_us_aud": {
+          "design": 0.35,
+          "hist": 0.04948404262938584,
+          "beta": -0.05,
+          "t": -0.47,
+          "sign_stable_oos": null,
+          "weight_final": 0.134
+        },
+        "usd_basket": {
+          "design": 0.0,
+          "hist": 0.8482306023146235,
+          "beta": -0.849,
+          "t": -8.09,
+          "sign_stable_oos": null,
+          "weight_final": 0.401
+        },
+        "usd_cpi_surprise_z": {
+          "design": 0.0,
+          "hist": 0.0893141733830011,
+          "beta": -0.089,
+          "t": -0.87,
+          "sign_stable_oos": null,
+          "weight_final": 0.042
+        },
+        "aud_cpi_surprise_z": {
+          "design": 0.2,
+          "hist": 0.012971181672989478,
+          "beta": 0.013,
+          "t": 0.13,
+          "sign_stable_oos": null,
+          "weight_final": 0.069
+        },
+        "china_demand": {
+          "design": 0.25,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.197
+        },
+        "commodity_link": {
+          "design": 0.2,
+          "hist": null,
+          "beta": null,
+          "t": null,
+          "sign_stable_oos": null,
+          "hist_data": "MISSING",
+          "weight_final": 0.157
+        }
+      }
+    }
+  }
+}
