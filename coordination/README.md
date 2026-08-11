@@ -43,6 +43,14 @@ git add -A && git commit -m "T3 done" && git push
 # Agent A (this account, next pull) sees T3 DONE and can pick up the result.
 ```
 
+## Real-time option (instead of polling)
+
+The task board is async (minutes). For **real-time talk**, use `relay/` (README there):
+run `relay/relay_server.py` on the laptop, run `relay/agent_bridge.py` on each side,
+and read `relay/inbox_<me>.txt` / write `relay/outbox_<me>.txt`. Messages arrive in
+~1-2 s and are durable (offline sides catch up on reconnect). Use the board for tasks
+that outlive a conversation; use the relay for live back-and-forth.
+
 ## Optional: watcher (notify on new pushes)
 
 `scripts/coord_watch.py` polls the repo (default every 60s) and prints new tasks /

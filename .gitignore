@@ -5,3 +5,10 @@ market-data/
 .venv/
 venv/
 coordination/.watch_state
+
+# real-time relay runtime (git-ignored)
+relay/messages/
+relay/inbox_*.txt
+relay/outbox_*.txt
+relay/.bridge_*.state
+relay/participants.json
