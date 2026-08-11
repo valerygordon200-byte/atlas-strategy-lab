@@ -72,6 +72,26 @@ and read `relay/inbox_<me>.txt` / write `relay/outbox_<me>.txt`. Messages arrive
 ~1-2 s and are durable (offline sides catch up on reconnect). Use the board for tasks
 that outlive a conversation; use the relay for live back-and-forth.
 
+## The autonomous executor (desktop-worker) — tasks run WITHOUT a session
+
+`relay/desktop_worker.py` runs 24/7 on the desktop (started by `start_client.bat`
+when `WORKER_ENABLED=1` in `relay_config.txt`). It polls the board and executes
+tasks itself, so work happens even when no Freebuff session is open:
+
+- **Mechanical tasks** — post with `--cmd`, the worker runs it and commits the
+  result. Command must be `python <repo-relative script> [args...]`; anything
+  else is rejected by its whitelist.
+  ```bash
+  python scripts/coord.py new "Rebuild USDJPY drift report" --cmd "python scripts/regen_report.py" --me laptop-dourmouse
+  ```
+- **LLM tasks** — post with `--dispatch claude`; runs through Claude Code CLI
+  headlessly, but only when the desktop config has `WORKER_CLAUDE=1` (off by
+  default — it costs API credits).
+- Every lifecycle step (claim, run, done + output) is announced on the relay, so
+  it appears in the chat feed in real time. Relay message text is NEVER executed
+  — only board `cmd`/`dispatch` fields, and only whitelisted ones.
+- Test locally any time: `python relay/desktop_worker.py --once`.
+
 ## Optional: watcher (notify on new pushes)
 
 `scripts/coord_watch.py` polls the repo (default every 60s) and prints new tasks /
