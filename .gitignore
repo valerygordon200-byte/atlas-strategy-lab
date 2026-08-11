@@ -4,3 +4,4 @@ __pycache__/
 market-data/
 .venv/
 venv/
+coordination/.watch_state

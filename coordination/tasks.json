@@ -1,0 +1,48 @@
+{
+  "tasks": [
+    {
+      "id": "T1",
+      "text": "Source central-bank gold net-purchase series (2015-present, monthly) from WGC/IMF/national disclosures; add to bookshelf; re-run weight_calibrator for GOLD",
+      "priority": "high",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T00:00:00+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null
+    },
+    {
+      "id": "T2",
+      "text": "Build unified data-ingest registry replacing per-script loaders (resolve asset/factor key -> source, quality gates, battery feed)",
+      "priority": "mid",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T00:00:00+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null
+    }
+  ],
+  "log": [
+    {
+      "t": "2026-08-11T00:00:00+00:00",
+      "who": "desktop-atlas",
+      "event": "new",
+      "id": "T1",
+      "text": "Source central-bank gold net-purchase series"
+    },
+    {
+      "t": "2026-08-11T00:00:00+00:00",
+      "who": "desktop-atlas",
+      "event": "new",
+      "id": "T2",
+      "text": "Build unified data-ingest registry"
+    },
+    {
+      "t": "2026-08-11T14:18:30+00:00",
+      "who": "desktop-atlas",
+      "event": "claim",
+      "id": "T2"
+    }
+  ]
+}
