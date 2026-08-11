@@ -141,6 +141,13 @@ must be installed, logged in, API enabled on 7497, and reachable at
 `192.168.1.95` / `100.84.156.49`. Exact steps: `docs/IBKR_PAPER_SETUP.md`.
 This is the last unmet item toward spec §4 #2 (a full paper-trade cycle).
 
+**The human step is now self-detecting:** `scripts/gateway_watch.py` (pushed
+84e4487, running as a daemon on the Mac) polls 7497 on all three IPs every 5s;
+the moment the Gateway comes up it runs `ibkr_connector.py --check` and
+broadcasts "GATEWAY UP + PAPER CONNECTOR VERIFIED — ready for the first paper
+fill" on the relay, so the desktop knows without anyone polling. Tested
+end-to-end with a dummy listener (detection → check → re-arm on port close).
+
 ---
 
 ## 7. How the autonomous worker works
@@ -164,6 +171,12 @@ after every message, resets its watermark if the feed is cleared.
 4. **dourmouse GitHub repo** — the desktop's pushes to `adit2011238-glitch/dourmouse`
    403 (owner mismatch); hub files are mirrored in this repo under `dourmouse/`.
 5. **Hub on laptop** — FEED pane now points at the laptop feed via `HUB_FEED_URL`.
+6. **Laptop dashboard parity** — re-gated 2026-08-11 to the current C4 code
+   (`--send-token`, 401/401/200 verified); orphaned supervisor removed so only
+   one worker+supervisor pair runs.
+7. **T11 board state** — set BLOCKED (owner joint) by the desktop; the only
+   remaining action is the human Gateway login. The watcher above announces
+   the moment that's done.
 
 ---
 
