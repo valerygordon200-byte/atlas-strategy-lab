@@ -22,7 +22,22 @@ import urllib.request
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY = "/Volumes/ATLAS /dourmouse-4.0.0/.venv/bin/python"
 RELAY = "http://100.98.97.23:8787"
-TOKEN = "jXVXaHAeG721UkhMYRSq3rRXAK-iBIAY"
+# Secret comes from relay_config.txt (gitignored) or env — NEVER hardcode a
+# token in a script committed to the public repo (that burned us once).
+def _load_token():
+    t = os.environ.get("RELAY_TOKEN", "")
+    if t:
+        return t
+    try:
+        cfg = os.path.join(REPO, "relay", "relay_config.txt")
+        with open(cfg, encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("TOKEN="):
+                    return line.strip().split("=", 1)[1]
+    except OSError:
+        pass
+    raise SystemExit("RELAY_TOKEN not set and relay/relay_config.txt missing")
+TOKEN = _load_token()
 ME = "laptop-dourmouse"
 HOSTS = ["127.0.0.1", "192.168.1.95", "100.84.156.49"]
 PORT = 7497

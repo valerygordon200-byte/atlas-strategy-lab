@@ -9,7 +9,7 @@ LOG = os.path.join(REPO, "relay", "bridge_laptop.log")
 cmd = [
     sys.executable, "relay/agent_bridge.py",
     "--relay", "http://100.98.97.23:8787",
-    "--token", "jXVXaHAeG721UkhMYRSq3rRXAK-iBIAY",
+    "--token", os.environ.get("RELAY_TOKEN", _cfg_token(__file__)),
     "--me", "laptop-dourmouse",
 ]
 logf = open(LOG, "a")

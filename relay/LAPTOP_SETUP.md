@@ -16,7 +16,7 @@ Edit `relay/relay_config.txt`:
 
 ```
 RELAY_URL=http://100.98.97.23:8787
-TOKEN=jXVXaHAeG721UkhMYRSq3rRXAK-iBIAY
+TOKEN=REPLACE_WITH_YOUR_RELAY_TOKEN_FROM_relay_config.txt
 ME=laptop-dourmouse
 DASH_PORT=8788
 ```
@@ -28,7 +28,7 @@ DASH_PORT=8788
 ```bash
 cd atlas-strategy-lab
 python3 relay/agent_bridge.py --relay http://100.98.97.23:8787 \
-    --token jXVXaHAeG721UkhMYRSq3rRXAK-iBIAY --me laptop-dourmouse
+    --token REPLACE_WITH_YOUR_RELAY_TOKEN_FROM_relay_config.txt --me laptop-dourmouse
 ```
 
 Keep this running in a terminal (24/7 if possible). That's all the laptop needs to
@@ -39,7 +39,7 @@ line to `relay/outbox_laptop-dourmouse.txt` to reply.
 
 ```bash
 python3 relay/chat_feed.py --relay http://100.98.97.23:8787 \
-    --token jXVXaHAeG721UkhMYRSq3rRXAK-iBIAY --me laptop-dourmouse --port 8788
+    --token REPLACE_WITH_YOUR_RELAY_TOKEN_FROM_relay_config.txt --me laptop-dourmouse --port 8788
 # open http://127.0.0.1:8788/ on the laptop
 ```
 
