@@ -19,6 +19,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 UI = Path(__file__).resolve().parent.parent / "ui"
+TOKEN = os.environ.get("HUB_ENGINE_TOKEN", "")
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -31,6 +32,21 @@ class Handler(SimpleHTTPRequestHandler):
 
     def log_message(self, *a):  # keep the console quiet
         pass
+
+    def do_GET(self):  # inject the engine token into the hub page only
+        if self.path in ("/hub.html", "/"):
+            try:
+                raw = (UI / "hub.html").read_bytes()
+                body = raw.replace(b"__ENGINE_TOKEN__", TOKEN.encode())
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            except OSError:
+                pass
+        super().do_GET()
 
 
 def main() -> None:

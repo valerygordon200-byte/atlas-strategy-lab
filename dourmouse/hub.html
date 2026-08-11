@@ -136,6 +136,8 @@
 <script>
 const ENGINE = "http://127.0.0.1:8790";
 const FEED   = "http://127.0.0.1:8788";
+const ENGINE_TOKEN = "__ENGINE_TOKEN__";
+const EH = ENGINE_TOKEN && ENGINE_TOKEN !== "" ? { "Content-Type": "application/json", "X-Engine-Token": ENGINE_TOKEN } : { "Content-Type": "application/json" };
 
 // ---- tabs ----
 document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
@@ -148,7 +150,7 @@ document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () =>
 // ---- health ----
 async function health() {
   const set = (id, ok) => { const d = document.getElementById(id); d.className = "dot " + (ok ? "ok" : "bad"); };
-  try { await fetch(ENGINE + "/api/health"); set("hAtlas", true); } catch (e) { set("hAtlas", false); }
+  try { await fetch(ENGINE + "/api/health", {headers: EH}); set("hAtlas", true); } catch (e) { set("hAtlas", false); }
   try { await fetch(FEED + "/feed?since=0"); set("hFeed", true); } catch (e) { set("hFeed", false); }
   set("hShell", true);
 }
@@ -157,7 +159,7 @@ health(); setInterval(health, 10000);
 // ---- atlas: keys + coverage ----
 async function loadKeys() {
   try {
-    const r = await fetch(ENGINE + "/api/keys");
+    const r = await fetch(ENGINE + "/api/keys", {headers: EH});
     const d = await r.json();
     const keys = d.keys;
     document.getElementById("kKeys").textContent = keys.length;
@@ -170,7 +172,7 @@ async function loadKeys() {
     });
     // coverage via gates backtest
     const g = await (await fetch(ENGINE + "/api/backtest", {method:"POST",
-      headers:{"Content-Type":"application/json"}, body: JSON.stringify({id:"registry_gates"})})).json();
+      headers: EH, body: JSON.stringify({id:"registry_gates"})})).json();
     document.getElementById("kOk").textContent = g.result.keys_ok;
     document.getElementById("kKeysSub").textContent = "ok " + g.result.keys_ok + " / fail " + g.result.keys_fail;
   } catch (e) { document.getElementById("kKeysSub").textContent = "engine unreachable: " + e; }
@@ -184,7 +186,7 @@ async function runBt(id, btn) {
   btn.disabled = true;
   try {
     const r = await fetch(ENGINE + "/api/backtest", {method:"POST",
-      headers:{"Content-Type":"application/json"}, body: JSON.stringify({id})});
+      headers: EH, body: JSON.stringify({id})});
     const d = await r.json();
     out.textContent = d.ok ? JSON.stringify(d.result, null, 2) : "ERROR: " + d.error;
   } catch (e) { out.textContent = "engine unreachable: " + e; }
@@ -212,7 +214,7 @@ document.getElementById("btData").addEventListener("click", async () => {
   const out = document.getElementById("dataOut");
   out.textContent = "loading " + key + "…";
   try {
-    const r = await fetch(ENGINE + "/api/data/" + key + "?limit=5");
+    const r = await fetch(ENGINE + "/api/data/" + key + "?limit=5", {headers: EH});
     const d = await r.json();
     out.textContent = d.ok ? JSON.stringify({key:d.key, rows:d.rows, from:d.from, to:d.to, sample:d.sample}, null, 2)
                            : "ERROR: " + d.error;
