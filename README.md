@@ -122,6 +122,35 @@ Data layout expected: `market-data/normalized/<PAIR>/<PAIR>_d1.parquet` (FX),
 `market-data/events/events.parquet` (calendar: forecast + actual),
 `market-data/raw/yahoo/COMM_*_d.csv` (commodities).
 
+## How to add data
+
+1. Put the file under `market-data/` in the right subfolder (e.g.
+   `market-data/fundamentals/`, `market-data/raw/yahoo/`, `market-data/events/`).
+2. Register it in `data/registry.json` under `sources` (kind + path + `min_obs`
+   quality gate), following the existing `fx` / `commodity` / `fundamental` /
+   `gold` entries. The registry is the single loader — every read goes through
+   `scripts/data_registry.py` and its gates.
+3. For a curated series (like the central-bank gold data) also add a
+   provenance README next to the CSV (source, definition, gaps, revisions).
+4. Re-run `scripts/bookshelf_build.py` if the data feeds a strategy factor,
+   and `scripts/health_check.py --base <root>` to confirm the gates still pass.
+
+## How to add a strategy
+
+1. Write the signal + backtest as a script under `scripts/`, following the
+   existing patterns (`fx_strict_battery.py`, `seasonal_batch.py`, or
+   `news_drift_*` for news-driven signals).
+2. Run it through the **six-gate battery**: in-sample t-stat (Newey-West),
+   in-sample permutation (p<1%), blind holdout (t>2), walk-forward,
+   walk-forward permutation, walk-forward bootstrap — plus the cost ladder.
+   The battery helpers live in `scripts/strict_battery.py`.
+3. If it survives, lock the direction in `strategy_catalog.json` and record the
+   verdict in a report under `reports/`.
+4. If it's a keeper, add it to `scripts/golden_regressions.py` so any future
+   drift fails the build loudly (the C7 release gate).
+5. Paper-trade it through the execution layer (see `docs/IBKR_PAPER_SETUP.md`)
+   and log fills to `market-data/executions/executions.csv`.
+
 ## Setup — relay + deployment (C1/C6)
 
 The repo is also the relay hub for the laptop/desktop agent pair. Everything is
