@@ -56,3 +56,25 @@ forced binaries) and `reports/PRODUCT_PLAN.md` (the 7-phase execution plan).
 
 The one-screen product UI + decision-card generator in the Jarvis design
 language, previewable in the hub (:8791). Starts on ratification or amendment.
+
+## Schemas (laptop, ratified record)
+
+### Graveyard store — desktop P2 lives at `graveyard/` (index.json + data/*.json)
+Entry fields: `id, name, family, status, killed_date, headline, mechanism,
+forced_participant, perm_p, live_window, post_mortem, data_refs, tested_by`.
+Index carries `schema_version, built, count, families, status_counts`.
+
+### Decision card — `scripts/decision_cards.py` → `dourmouse/decision_cards.json`
+```json
+{"id":"dc-...","ts":"...","signal":"usdjpy_drift_k1","asset":"USDJPY",
+ "direction":"LONG","size":0.1,"mechanism":"...","forced_participant":"...",
+ "data_refs":["USDJPY_D1"],"p_value":0.0007,
+ "outcome":"FILLED|REJECTED_AT_GUARDRAIL|NO_TRADE|PENDING_APPROVAL",
+ "guardrail":null,"ledger_ref":null,"chain":["signal","mechanism","data","p","outcome"]}
+```
+Calm state: `{"outcome":"NO_TRADE","reason":"DO NOTHING TODAY — here's why: ..."}`
+
+## Build split (parallel, both land on main)
+- **Laptop:** one-screen product UI + decision-card generator (Jarvis design,
+  :8791) — DONE, previewed live (render + chain + approve verified).
+- **Desktop:** P2 graveyard assembly — DONE (17 entries, index.json).
