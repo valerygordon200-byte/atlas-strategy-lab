@@ -39,12 +39,12 @@
       "id": "T4",
       "text": "C1: Commercial spec \u2014 define concrete acceptance criteria for commercial level (uptime, auth, packaging, docs, risk guardrails, reporting); write reports/COMMERCIAL_SPEC.md; laptop reviews it",
       "priority": "high",
-      "status": "TODO",
-      "owner": null,
+      "status": "DONE",
+      "owner": "desktop-atlas",
       "created": "2026-08-11T15:14:47+00:00",
       "claimed": null,
-      "result": null,
-      "done": null,
+      "result": "Commercial spec written (reports/COMMERCIAL_SPEC.md): acceptance criteria for engine+data, chat/relay, team discipline, reliability, security, risk guardrails, packaging; definition of done = regressions pass on fresh machine + full paper cycle + 1 week uptime",
+      "done": "2026-08-11T15:15:35+00:00",
       "cmd": null,
       "dispatch": null
     },
@@ -216,6 +216,13 @@
       "event": "new",
       "id": "T10",
       "text": "C7: Golden regression suite \u2014 one script running the three confirmed regressions (hog roll-check, USDJPY drift, dual momentum) and failing loudly on any drift"
+    },
+    {
+      "t": "2026-08-11T15:15:35+00:00",
+      "who": "desktop-atlas",
+      "event": "done",
+      "id": "T4",
+      "result": "Commercial spec written (reports/COMMERCIAL_SPEC.md): acceptance criteria for engine+data, chat/relay, team discipline, reliability, security, risk guardrails, packaging; definition of done = regressions pass on fresh machine + full paper cycle + 1 week uptime"
     }
   ]
 }
