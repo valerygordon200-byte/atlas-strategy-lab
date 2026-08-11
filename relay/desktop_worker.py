@@ -216,10 +216,23 @@ def relay_recv(cfg: dict, last_id: int, timeout: int = 10) -> tuple[list[dict], 
         return [], last_id
 
 
+_LAST_ACK_T = 0.0
+_ACK_COOLDOWN = 60.0  # seconds — hard guard against ack ping-pong loops
+
+
+def _is_ack_noise(msg: str) -> bool:
+    """A re-ack / echo of another message is not new information — never ack it."""
+    m = msg.lower()
+    return ("noted" in m or "auto-ack" in m or "acknowledged" in m
+            or m.startswith("@desktop-worker") or "received" in m and "message" in m)
+
+
 def auto_ack(cfg: dict) -> None:
     """User rule: any message from the other device gets an immediate reply —
     even when no Freebuff session is open. Batched, once-per-id, laptop-only,
-    so we never flood the feed the way the laptop's re-ack loop does."""
+    and SUBSTANTIVE-only: re-acks/echoes are never acked (they ping-pong with
+    the laptop's re-ack loop and flood the feed). Plus a hard 60s cooldown."""
+    global _LAST_ACK_T
     acked: set[int] = set()
     if ACK_FILE.exists():
         try:
@@ -227,15 +240,18 @@ def auto_ack(cfg: dict) -> None:
         except Exception:
             acked = set()
     last_id = max(acked) if acked else 0
-    msgs, max_id = relay_recv(cfg, last_id)
-    if not msgs:
-        return
-    fresh = [m for m in msgs if m["id"] not in acked and m.get("from") == "laptop-dourmouse"]
+    msgs, _ = relay_recv(cfg, last_id)
+    fresh = [m for m in msgs if m["id"] not in acked and m.get("from") == "laptop-dourmouse"
+             and not _is_ack_noise(m.get("msg", ""))]
     if not fresh:
         return
+    if time.time() - _LAST_ACK_T < _ACK_COOLDOWN:
+        return
     ids = [m["id"] for m in fresh]
-    relay_send(cfg, f"auto-ack (desktop): received {len(fresh)} new message(s) from laptop-dourmouse "
-                    f"ids {min(ids)}..{max(ids)} — noted, will respond in full when the session opens.")
+    relay_send(cfg, f"auto-ack (desktop): received {len(fresh)} new substantive message(s) "
+                    f"from laptop-dourmouse ids {min(ids)}..{max(ids)} — will respond in full "
+                    f"when the session opens.")
+    _LAST_ACK_T = time.time()
     acked.update(ids)
     ACK_FILE.write_text(json.dumps({"acked": sorted(acked)}, indent=2), encoding="utf-8")
 
