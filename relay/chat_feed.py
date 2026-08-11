@@ -11,6 +11,11 @@ Then open http://127.0.0.1:8788/ — the page live-streams every relay message
   GET  /feed?since -> newest messages across all participants (proxies /all)
   GET  /who        -> participants (proxies /ping)
   POST /send       -> send as --me (proxies /send)
+
+Optional client gating: pass --send-token <secret> and the dashboard send box
+requires the client to send that secret in the X-Engine-Token header, so a
+browser that can reach the port still cannot post without it. The feed/render
+paths stay open (read-only for anyone who can reach the port).
 """
 import argparse
 import json
@@ -57,7 +62,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             body = (ROOT / "chat.html").read_bytes().replace(
-                b"__ME__", self.server.me.encode())
+                b"__ME__", self.server.me.encode()).replace(
+                b"__SEND_TOKEN__", self.server.send_token.encode())
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -93,6 +99,8 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(n).decode("utf-8"))
         except Exception:
             return self._json(400, {"error": "bad json"})
+        if self.server.send_token and self.headers.get("X-Engine-Token") != self.server.send_token:
+            return self._json(401, {"error": "missing or bad X-Engine-Token"})
         payload = {"token": self.server.token, "from": self.server.me,
                    "to": body.get("to", "*"), "msg": body.get("msg", "").strip()}
         if not payload["msg"]:
@@ -108,12 +116,14 @@ def main():
     ap.add_argument("--relay", required=True)
     ap.add_argument("--token", required=True)
     ap.add_argument("--me", required=True)
+    ap.add_argument("--send-token", default="", help="optional secret clients must send as X-Engine-Token to post"),
     ap.add_argument("--port", type=int, default=8788)
     ap.add_argument("--host", default="127.0.0.1")
     args = ap.parse_args()
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
-    srv.relay, srv.token, srv.me = args.relay, args.token, args.me
-    print(f"chat feed on http://{args.host}:{args.port}  relay={args.relay}  me={args.me}")
+    srv.relay, srv.token, srv.me, srv.send_token = args.relay, args.token, args.me, args.send_token
+    gate = "GATED" if args.send_token else "open (no --send-token)"
+    print(f"chat feed on http://{args.host}:{args.port}  relay={args.relay}  me={args.me}  send={gate}")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

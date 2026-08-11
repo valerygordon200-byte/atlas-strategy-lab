@@ -43,6 +43,7 @@
 </footer>
 <script>
   const ME = "__ME__";
+  const SEND_TOKEN = "__SEND_TOKEN__";
   let lastId = 0, firstLoad = true;
   const msgs = document.getElementById("msgs");
   const statusEl = document.getElementById("status");
@@ -80,7 +81,9 @@
     const to = document.getElementById("to").value.trim() || "*";
     const msg = text.value.trim(); if (!msg) return;
     const btn = document.getElementById("send"); btn.disabled = true;
-    try { await fetch("/send", { method: "POST", headers: {"Content-Type": "application/json"},
+    const hdr = { "Content-Type": "application/json" };
+    if (SEND_TOKEN && SEND_TOKEN !== "") hdr["X-Engine-Token"] = SEND_TOKEN;
+    try { await fetch("/send", { method: "POST", headers: hdr,
           body: JSON.stringify({ to, msg }) }); text.value = ""; }
     catch (e) {}
     btn.disabled = false;
