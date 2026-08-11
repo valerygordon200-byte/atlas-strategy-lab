@@ -30,25 +30,13 @@ SHORT_RATE = 0.000029  # per night, shorts (T212)
 
 
 def load_events_all(currency: str = "USD", impact=("High", "Medium")) -> pd.DataFrame:
-    ev = pd.read_parquet(BASE / "market-data/events/events.parquet")
-    ev["date_utc"] = pd.to_datetime(ev["date_utc"], utc=True)
-    m = (ev["currency"] == currency) & ev["actual"].notna() & ev["forecast"].notna()
-    if impact is not None:
-        m &= ev["impact"].isin(impact)
-    ev = ev[m].copy()
-    ev["surprise"] = (pd.to_numeric(ev["actual"], errors="coerce") -
-                      pd.to_numeric(ev["forecast"], errors="coerce"))
-    ev = ev.dropna(subset=["surprise"]).sort_values("date_utc")
-    ev["z"] = np.nan
-    for _t, g in ev.groupby("title"):
-        g = g.sort_values("date_utc")
-        s = g["surprise"]
-        mu = s.expanding(min_periods=20).mean().shift(1)
-        sd = s.expanding(min_periods=20).std().shift(1)
-        z = (s - mu) / sd.where(sd > 1e-12)
-        ev.loc[g.index, "z"] = z.clip(-8, 8)
-    ev["date"] = ev["date_utc"].dt.date
-    return ev
+    """All events with per-title expanding z (no trigger filter — callers apply).
+
+    Canonical implementation now lives in data_registry.py (T2 unified
+    ingest); z_thr=None preserves this function's unfiltered semantics.
+    """
+    from data_registry import load as _reg_load
+    return _reg_load("events", currency=currency, impact=impact, z_thr=None)
 
 
 def close_from_csv(path: str) -> pd.Series:

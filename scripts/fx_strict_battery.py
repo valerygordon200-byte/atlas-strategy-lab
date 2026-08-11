@@ -62,26 +62,15 @@ CONV = {"EURUSD": -1, "GBPUSD": -1, "AUDUSD": -1, "USDJPY": 1, "USDCAD": 1}
 
 
 def load_big_events() -> pd.DataFrame:
-    """USD High+Medium events with actual+forecast; per-title EXPANDING z."""
-    ev = pd.read_parquet(BASE / "market-data/events/events.parquet")
-    ev["date_utc"] = pd.to_datetime(ev["date_utc"], utc=True)
-    ev = ev[(ev["currency"] == "USD") &
-            (ev["impact"].isin(["High", "Medium"])) &
-            ev["actual"].notna() & ev["forecast"].notna()].copy()
-    ev["surprise"] = (pd.to_numeric(ev["actual"], errors="coerce") -
-                      pd.to_numeric(ev["forecast"], errors="coerce"))
-    ev = ev.dropna(subset=["surprise"]).sort_values("date_utc")
-    ev["z"] = np.nan
-    for title, g in ev.groupby("title"):
-        g = g.sort_values("date_utc")
-        s = g["surprise"]
-        mu = s.expanding(min_periods=20).mean().shift(1)
-        sd = s.expanding(min_periods=20).std().shift(1)
-        z = (s - mu) / sd.where(sd > 1e-12)
-        ev.loc[g.index, "z"] = z.clip(-8, 8)
-    ev = ev[ev["z"].abs() >= Z_THR].copy()
-    ev["date"] = ev["date_utc"].dt.date
-    return ev
+    """USD High+Medium events with actual+forecast; per-title EXPANDING z.
+
+    Canonical implementation now lives in data_registry.py (T2 unified
+    ingest). Semantics identical to the previous inline version except the
+    registry also dedupes (date_utc, title, currency) — the old loader
+    double-counted re-captured releases with revised prints.
+    """
+    from data_registry import load as _reg_load
+    return _reg_load("events")
 
 
 def event_net_frame(pair: str, events: pd.DataFrame) -> pd.DataFrame:

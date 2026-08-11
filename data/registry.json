@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "base": "E:\\forex-data",
+  "generated": "2026-08-11T15:07:54+00:00",
+  "sources": {
+    "fx": {
+      "kind": "fx",
+      "template": true,
+      "template_fields": [
+        "sym",
+        "tf"
+      ],
+      "path": "market-data/normalized/{sym}/{sym}_{tf}.parquet",
+      "note": "normalized OHLC parquet, IBKR/Yahoo",
+      "min_obs": 2500
+    },
+    "events": {
+      "kind": "events",
+      "path": "market-data/events/events.parquet",
+      "note": "Forex Factory archive (live-captured)"
+    },
+    "commodity": {
+      "kind": "commodity",
+      "path": "market-data/raw/yahoo/COMM_{sym}_d.csv",
+      "note": "Yahoo continuous back-adjusted futures",
+      "min_obs": 2500
+    },
+    "fundamental": {
+      "kind": "fundamental",
+      "path": "market-data/fundamentals/{file}.csv",
+      "note": "FRED series",
+      "min_obs": 100
+    },
+    "cpi": {
+      "kind": "cpi",
+      "path": "market-data/rates/{file}.csv",
+      "note": "policy-era FRED CPI",
+      "min_obs": 100
+    },
+    "rate": {
+      "kind": "rate",
+      "path": "market-data/rates/policy_rates.csv",
+      "note": "8-currency policy rates, tz-normalized"
+    },
+    "ledger": {
+      "kind": "ledger",
+      "path": "market-data/news_drift/forward_ledger.csv",
+      "note": "live USDJPY drift forward ledger"
+    }
+  },
+  "discovered": {
+    "fx_pairs": [
+      "AUDJPY",
+      "AUDUSD",
+      "BTCUSD",
+      "EURCHF",
+      "EURGBP",
+      "EURJPY",
+      "EURUSD",
+      "GBPJPY",
+      "GBPUSD",
+      "GOLD",
+      "GSR",
+      "NDX",
+      "NZDUSD",
+      "OIL",
+      "SILVER",
+      "SP500",
+      "USDCAD",
+      "USDCHF",
+      "USDJPY"
+    ],
+    "commodities": [
+      "BZ",
+      "CC",
+      "CL",
+      "CT",
+      "GC",
+      "GF",
+      "HE",
+      "HG",
+      "HO",
+      "KC",
+      "LB",
+      "LE",
+      "NG",
+      "OJ",
+      "PA",
+      "PL",
+      "RB",
+      "SB",
+      "SI",
+      "ZC",
+      "ZL",
+      "ZM",
+      "ZO",
+      "ZR",
+      "ZS",
+      "ZW"
+    ],
+    "fundamentals": [
+      "cpi_aud",
+      "cpi_cad",
+      "cpi_chf",
+      "cpi_eur",
+      "cpi_gbp",
+      "cpi_jpy",
+      "cpi_nzd",
+      "cpi_usd",
+      "manifest",
+      "oil_wti",
+      "rate_aud",
+      "rate_cad",
+      "rate_chf",
+      "rate_eur",
+      "rate_gbp",
+      "rate_jpy",
+      "rate_nzd",
+      "rate_usd",
+      "yield_aud",
+      "yield_cad",
+      "yield_chf",
+      "yield_eur",
+      "yield_gbp",
+      "yield_jpy",
+      "yield_nzd",
+      "yield_usd"
+    ],
+    "rates_files": [
+      "policy_rates"
+    ]
+  }
+}
