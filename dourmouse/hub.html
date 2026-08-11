@@ -80,14 +80,20 @@
 </header>
 
 <nav>
-  <div class="tab active" data-pane="atlas">▣ ATLAS <span class="tag">engine</span></div>
+  <div class="tab active" data-pane="product">◉ PRODUCT <span class="tag">the lab</span></div>
+  <div class="tab" data-pane="atlas">▣ ATLAS <span class="tag">engine</span></div>
   <div class="tab" data-pane="dourmouse">◈ DOURMOUSE <span class="tag">core</span></div>
   <div class="tab" data-pane="feed">≡ TAILSCALE FEED <span class="tag">live</span></div>
 </nav>
 
 <main>
+  <!-- ================= PRODUCT (one screen on load, tabs behind the Lab door) ================= -->
+  <section class="pane active" id="pane-product">
+    <iframe id="frameProd" src="product.html" style="width:100%; height:100%; border:none; background:var(--ground)"></iframe>
+  </section>
+
   <!-- ================= ATLAS ================= -->
-  <section class="pane active" id="pane-atlas">
+  <section class="pane" id="pane-atlas">
     <div class="row" style="margin-bottom:8px">
     <div class="card" style="flex:1">
       <h3>PIPELINE (supervisor :8792)</h3>

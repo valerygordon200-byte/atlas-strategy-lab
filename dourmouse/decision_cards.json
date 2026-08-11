@@ -1,13 +1,13 @@
 {
-  "generated": "2026-08-11T17:58:31Z",
-  "mode": "demo",
+  "generated": "2026-08-11T18:01:22Z",
+  "mode": "default-demo",
   "graveyard": {
     "count": 17
   },
   "cards": [
     {
       "id": "dc-demo-001",
-      "ts": "2026-08-11T17:58:31Z",
+      "ts": "2026-08-11T18:01:22Z",
       "signal": "usdjpy_drift_k1",
       "asset": "USDJPY",
       "direction": "LONG",
@@ -32,7 +32,7 @@
     },
     {
       "id": "dc-demo-002",
-      "ts": "2026-08-11T17:58:31Z",
+      "ts": "2026-08-11T18:01:22Z",
       "signal": "dual_momentum_k1",
       "asset": "GC_FUT",
       "direction": "LONG",
@@ -56,7 +56,7 @@
     },
     {
       "id": "dc-demo-003",
-      "ts": "2026-08-11T17:58:31Z",
+      "ts": "2026-08-11T18:01:22Z",
       "signal": "central_bank_net_buying",
       "asset": "GOLD",
       "direction": "HOLD",
