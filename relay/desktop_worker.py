@@ -199,6 +199,47 @@ def one_cycle(cfg: dict) -> None:
             print(f"push failed: {err[:200]} — will retry next cycle (task stays IN_PROGRESS)")
 
 
+ACK_FILE = ROOT / "relay" / ".worker_acks.json"
+
+
+def relay_recv(cfg: dict, last_id: int, timeout: int = 10) -> tuple[list[dict], int]:
+    """Fetch messages id>last_id for this worker (broadcast + direct)."""
+    url, token = cfg.get("RELAY_URL", ""), cfg.get("TOKEN", "")
+    if not url or not token:
+        return [], last_id
+    try:
+        q = f"/recv?token={token}&me={ME}&last_id={last_id}&timeout={timeout}"
+        with urllib.request.urlopen(url + q, timeout=timeout + 5) as r:
+            d = json.loads(r.read().decode())
+        return d.get("msgs", []), int(d.get("max_id", last_id))
+    except Exception:
+        return [], last_id
+
+
+def auto_ack(cfg: dict) -> None:
+    """User rule: any message from the other device gets an immediate reply —
+    even when no Freebuff session is open. Batched, once-per-id, laptop-only,
+    so we never flood the feed the way the laptop's re-ack loop does."""
+    acked: set[int] = set()
+    if ACK_FILE.exists():
+        try:
+            acked = set(json.loads(ACK_FILE.read_text(encoding="utf-8")).get("acked", []))
+        except Exception:
+            acked = set()
+    last_id = max(acked) if acked else 0
+    msgs, max_id = relay_recv(cfg, last_id)
+    if not msgs:
+        return
+    fresh = [m for m in msgs if m["id"] not in acked and m.get("from") == "laptop-dourmouse"]
+    if not fresh:
+        return
+    ids = [m["id"] for m in fresh]
+    relay_send(cfg, f"auto-ack (desktop): received {len(fresh)} new message(s) from laptop-dourmouse "
+                    f"ids {min(ids)}..{max(ids)} — noted, will respond in full when the session opens.")
+    acked.update(ids)
+    ACK_FILE.write_text(json.dumps({"acked": sorted(acked)}, indent=2), encoding="utf-8")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true", help="single scan cycle, then exit")
@@ -215,6 +256,7 @@ def main() -> None:
     while True:
         try:
             one_cycle(cfg)
+            auto_ack(cfg)
         except Exception as e:  # noqa: BLE001
             print(f"cycle error: {e}")
         if args.once:
