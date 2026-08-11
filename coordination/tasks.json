@@ -15,10 +15,10 @@
       "id": "T2",
       "text": "Build unified data-ingest registry replacing per-script loaders (resolve asset/factor key -> source, quality gates, battery feed)",
       "priority": "mid",
-      "status": "TODO",
-      "owner": null,
+      "status": "IN_PROGRESS",
+      "owner": "desktop-atlas",
       "created": "2026-08-11T00:00:00+00:00",
-      "claimed": null,
+      "claimed": "2026-08-11T15:05:31+00:00",
       "result": null,
       "done": null
     },
@@ -63,6 +63,12 @@
       "event": "new",
       "id": "T3",
       "text": "worker smoke test: list the board mechanically"
+    },
+    {
+      "t": "2026-08-11T15:05:31+00:00",
+      "who": "desktop-atlas",
+      "event": "claim",
+      "id": "T2"
     }
   ]
 }
