@@ -65,12 +65,12 @@
       "id": "T6",
       "text": "C3: dourmouse execution layer audit \u2014 which broker connectors (MT5/IBKR/T212) are live vs stubbed; paper path must execute real demo fills; report per connector",
       "priority": "high",
-      "status": "TODO",
-      "owner": null,
+      "status": "DONE",
+      "owner": "desktop-atlas",
       "created": "2026-08-11T15:14:48+00:00",
       "claimed": null,
-      "result": null,
-      "done": null,
+      "result": "C3 execution audit complete (reports/C3_EXECUTION_AUDIT.md): 0 live connectors; MT5/IBKR/T212/TV absent, Alpaca stubbed with credentials only. Honest verdict \u2014 no path places real demo fills today. Recommendation: build IBKR paper connector (place->fill->ledger round trip).",
+      "done": "2026-08-11T16:06:50+00:00",
       "cmd": null,
       "dispatch": null
     },
@@ -123,6 +123,19 @@
       "claimed": null,
       "result": "Golden regression suite (scripts/golden_regressions.py): 3 locked results recomputed in 1.9s \u2014 hog raw -13.62% t-7.53 vs real path -0.03% t-0.02 (PASS), USDJPY drift OOS t 3.711 (PASS), dual momentum +2.12%/mo t 4.49 (PASS). ALL GATES PASS, exit 0; FAIL = release blocker",
       "done": "2026-08-11T15:38:26+00:00",
+      "cmd": null,
+      "dispatch": null
+    },
+    {
+      "id": "T11",
+      "text": "C8: Build IBKR paper connector \u2014 TWS/Gateway API client that connects to the paper account (port 7497), places an order, receives the fill, and writes the ledger entry. Acceptance: one live paper-fill round trip on the desktop. Blocks C3's real-demo-fill criterion. Highest remaining gap to commercial.",
+      "priority": "high",
+      "status": "TODO",
+      "owner": null,
+      "created": "2026-08-11T16:06:50+00:00",
+      "claimed": null,
+      "result": null,
+      "done": null,
       "cmd": null,
       "dispatch": null
     }
@@ -278,6 +291,20 @@
       "event": "done",
       "id": "T1",
       "result": "Central-bank gold net purchases wired into GOLD: weight_calibrator reads the monthly WGC series (Nov 2020-Jun 2026, 55 obs) \u2014 central_bank_net_buying calibrated (hist 0.181, final 0.248, beta +0.144 t=1.08, mechanism-consistent sign). Golden regressions all pass."
+    },
+    {
+      "t": "2026-08-11T16:06:50+00:00",
+      "who": "desktop-atlas",
+      "event": "done",
+      "id": "T6",
+      "result": "C3 execution audit complete (reports/C3_EXECUTION_AUDIT.md): 0 live connectors; MT5/IBKR/T212/TV absent, Alpaca stubbed with credentials only. Honest verdict \u2014 no path places real demo fills today. Recommendation: build IBKR paper connector (place->fill->ledger round trip)."
+    },
+    {
+      "t": "2026-08-11T16:06:50+00:00",
+      "who": "DESKTOP-4U4T12K",
+      "event": "new",
+      "id": "T11",
+      "text": "C8: Build IBKR paper connector \u2014 TWS/Gateway API client that connects to the paper account (port 7497), places an order, receives the fill, and writes the ledger entry. Acceptance: one live paper-fill round trip on the desktop. Blocks C3's real-demo-fill criterion. Highest remaining gap to commercial."
     }
   ]
 }
