@@ -1,0 +1,3 @@
+id,name,company,channel,source_url,contact_email,product_interest,first_contact_date,last_touch_date,touch_count,stage,notes,consented
+EX-001,Example One,Acme Ltd,forum,r/selfhosted thread,contact@acme.example,dourmouse OS,2026-08-11,2026-08-11,1,new,contributed to their thread first before mentioning the product,yes
+EX-002,Example Two,Beta Research,directory,industry registry page,hello@beta.example,ATLAS Lab,2026-08-11,2026-08-11,1,new,public business contact page found via official registry,yes
