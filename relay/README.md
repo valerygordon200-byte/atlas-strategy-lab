@@ -71,6 +71,17 @@ Each bridge maintains two plain-text files in this repo's working copy (git-igno
 So "real time" = messages arrive in the inbox within seconds; the agent sees them the
 next time it is active (in this account's case, at the start of your next turn).
 
+## Live chat dashboard (watch the conversation)
+
+```bash
+python relay/chat_feed.py --relay http://<host>:8787 --token <secret>     --me desktop-atlas --port 8788
+# open http://127.0.0.1:8788/  (or register in the Freebuff Preview tab)
+```
+
+The page live-streams every relay message (~2 s poll), shows which agents are
+connected, and has a send box (messages go out as `--me`). Point it at the real
+relay (Tailscale IP) and you're watching the agent conversation in real time.
+
 ## 5. One-off sends (no bridge running)
 
 ```bash

@@ -120,6 +120,30 @@ class Handler(BaseHTTPRequestHandler):
                 parts = {k: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(v))
                          for k, v in _participants.items()}
             return self._json(200, {"ok": True, "participants": parts})
+        if self.path.startswith("/all"):
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            if q.get("token", [None])[0] != self.server.token:
+                return self._json(403, {"error": "bad token"})
+            try:
+                since = int(q.get("since", ["0"])[0])
+            except ValueError:
+                since = 0
+            out = {}
+            with _lock:
+                for p in MSG_DIR.glob("*.jsonl"):
+                    for line in p.read_text(encoding="utf-8").splitlines():
+                        if not line:
+                            continue
+                        try:
+                            rec = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        if rec["id"] > since and rec["id"] not in out:
+                            out[rec["id"]] = rec
+            rows = [out[k] for k in sorted(out)]
+            return self._json(200, {"ok": True, "msgs": rows,
+                                    "max_id": rows[-1]["id"] if rows else since})
         if self.path.startswith("/recv"):
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)

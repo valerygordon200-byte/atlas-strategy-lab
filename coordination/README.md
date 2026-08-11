@@ -43,6 +43,27 @@ git add -A && git commit -m "T3 done" && git push
 # Agent A (this account, next pull) sees T3 DONE and can pick up the result.
 ```
 
+## The orchestrator pattern (main objective -> delegated execution)
+
+When you give this account's agent a MAIN OBJECTIVE, it acts as coordinator:
+
+1. **Decompose** the objective into small outcome-shaped tasks and add them to the
+   board (`coord.py new`), each with a priority.
+2. **Broadcast the plan** over the relay: `objective: <one line>; tasks: T1..Tn;
+   I'm taking T<x>, T<y> is open` — the other agent sees it in ~1-2 s.
+3. **Delegate by leaving open TODOs.** Any agent may claim one
+   (`coord.py claim`, push immediately). One owner per task (claim lock).
+4. **Both sides execute autonomously** and push artifacts to the repo; when done:
+   `coord.py done <id> "<one-line result>"` + a relay message.
+5. **Integrate:** the coordinator reviews every DONE task, runs any final
+   validation, writes the objective summary to `reports/`, and reports to the user.
+6. **Standing behaviour of every agent:** check `relay/inbox_<me>.txt` and the task
+   board at the start of every turn; reply over the relay before ending a turn.
+7. **Escalation:** a task stuck IN_PROGRESS >24h with no log entries is stale —
+   comment on it (never silently take it); after 48h the coordinator may reclaim it.
+
+The board is the plan, the relay is the conversation, the repo is the work product.
+
 ## Real-time option (instead of polling)
 
 The task board is async (minutes). For **real-time talk**, use `relay/` (README there):
