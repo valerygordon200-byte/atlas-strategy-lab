@@ -3,11 +3,16 @@
 
 Uses coordination/tasks.json as the single source of truth in this repo.
 Commands:
-  new   "<task text>" [--priority low|mid|high] [--me NAME]
+  new   "<task text>" [--priority low|mid|high] [--me NAME] [--cmd CMD]
   list  [--status TODO|IN_PROGRESS|DONE] [--me NAME]
   claim <id> [--me NAME]
   done  <id> "<one-line result>" [--me NAME]
   log   [--tail N]
+
+--cmd marks a task as mechanical: relay/desktop_worker.py executes it
+autonomously (whitelisted: python <repo-relative script> [args...]) and
+reports the output over the relay. Tasks without --cmd need an LLM agent
+(Freebuff session, or claude dispatch if WORKER_CLAUDE=1).
 
 Discipline: pull before list/claim, push right after claim, push after done.
 Last-writer-wins on tasks.json is mitigated by the claim lock: never edit a task
@@ -61,10 +66,12 @@ def cmd_new(args):
     tid = next_id(b["tasks"])
     b["tasks"].append({"id": tid, "text": args.text, "priority": args.priority,
                        "status": "TODO", "owner": None, "created": now(),
-                       "claimed": None, "result": None, "done": None})
+                       "claimed": None, "result": None, "done": None,
+                       "cmd": args.cmd, "dispatch": args.dispatch})
     log_event(b, {"t": now(), "who": who(args), "event": "new", "id": tid, "text": args.text})
     save(b)
-    print(f"created {tid}: {args.text} [{args.priority}]")
+    kind = f" [mechanical: {args.cmd}]" if args.cmd else f" [dispatch: {args.dispatch}]" if args.dispatch else ""
+    print(f"created {tid}: {args.text} [{args.priority}]{kind}")
 
 
 def cmd_list(args):
@@ -123,9 +130,12 @@ def cmd_log(args):
 
 def main():
     ap = argparse.ArgumentParser(prog="coord.py")
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub = ap.add_subparsers(dest="command", required=True)
     p = sub.add_parser("new"); p.add_argument("text"); p.add_argument("--priority", default="mid",
         choices=["low", "mid", "high"]); p.add_argument("--me", default=None)
+    p.add_argument("--cmd", default=None, help="mechanical command for the desktop worker")
+    p.add_argument("--dispatch", default=None, choices=["claude"], help="LLM backend for open-ended tasks")
+
     p = sub.add_parser("list"); p.add_argument("--status", default=None,
         choices=["TODO", "IN_PROGRESS", "DONE"]); p.add_argument("--me", default=None)
     p = sub.add_parser("claim"); p.add_argument("id"); p.add_argument("--me", default=None)
@@ -133,7 +143,7 @@ def main():
     p = sub.add_parser("log"); p.add_argument("--tail", type=int, default=20)
     args = ap.parse_args()
     {"new": cmd_new, "list": cmd_list, "claim": cmd_claim, "done": cmd_done,
-     "log": cmd_log}[args.cmd](args)
+     "log": cmd_log}[args.command](args)
 
 
 if __name__ == "__main__":

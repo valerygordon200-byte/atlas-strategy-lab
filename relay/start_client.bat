@@ -12,6 +12,7 @@ for /f "usebackq tokens=1,* delims==" %%a in ("relay_config.txt") do (
   if "%%a"=="TOKEN" set TOKEN=%%b
   if "%%a"=="ME" set ME=%%b
   if "%%a"=="DASH_PORT" set DASH_PORT=%%b
+  if "%%a"=="WORKER_ENABLED" set WORKER_ENABLED=%%b
 )
 if "%DASH_PORT%"=="" set DASH_PORT=8788
 echo Relay : %RELAY_URL%
@@ -22,4 +23,11 @@ start "chat-dashboard" cmd /c "python -u chat_feed.py --relay %RELAY_URL% --toke
 
 echo Starting agent bridge ...
 start "agent-bridge" cmd /c "python -u agent_bridge.py --relay %RELAY_URL% --token %TOKEN% --me %ME%"
+
+REM Autonomous executor (runs mechanical board tasks without a session open).
+if "%WORKER_ENABLED%"=="" set WORKER_ENABLED=0
+if "%WORKER_ENABLED%"=="1" (
+  echo Starting desktop worker ...
+  start "desktop-worker" cmd /c "python -u desktop_worker.py --poll 5"
+)
 endlocal

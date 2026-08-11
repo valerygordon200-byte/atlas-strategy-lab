@@ -15,3 +15,15 @@ ME=desktop-atlas
 
 # Chat dashboard port (this machine).
 DASH_PORT=8788
+
+# ---- Autonomous worker (relay/desktop_worker.py) ----
+# WORKER_ENABLED=1 runs the always-on executor: it polls the task board
+# (coordination/tasks.json) and runs mechanical tasks (created with
+# `coord.py new --cmd "python scripts/foo.py ..."`) WITHOUT any Freebuff
+# session open. Results are committed to the board and announced on the relay.
+WORKER_ENABLED=1
+
+# WORKER_CLAUDE=1 additionally lets the worker dispatch open-ended tasks
+# (board entries with --dispatch claude) through the Claude Code CLI
+# headlessly. Costs API credits — keep 0 unless you want that.
+WORKER_CLAUDE=0
