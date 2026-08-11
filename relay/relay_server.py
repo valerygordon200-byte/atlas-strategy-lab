@@ -51,7 +51,31 @@ def load_counter():
     return mx
 
 
+def rotate_archive(max_age_days: int = 30) -> int:
+    """C4 milestone 2: archive message files older than max_age_days.
+
+    Moves relay/messages/<file>.jsonl (and _broadcast) to relay/archive/ so
+    the live store stays small while history is preserved. Runs on startup.
+    """
+    import shutil
+    cutoff = time.time() - max_age_days * 86400
+    arch = MSG_DIR.parent / "archive"
+    arch.mkdir(exist_ok=True)
+    moved = 0
+    if not MSG_DIR.exists():
+        return 0
+    for f in MSG_DIR.glob("*.jsonl"):
+        try:
+            if f.stat().st_mtime < cutoff:
+                shutil.move(str(f), str(arch / f.name))
+                moved += 1
+        except OSError:
+            continue
+    return moved
+
+
 _counter = [load_counter()]     # monotonic message id, persisted across restarts
+_N_ARCHIVED = rotate_archive()  # archive stale stores once, at startup
 
 
 def next_id():
@@ -209,6 +233,7 @@ def main():
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     srv.token = args.token
     print(f"relay listening on {args.host}:{args.port}  token={args.token}")
+    print(f"archive: {_N_ARCHIVED} old store(s) moved to relay/archive/")
     print(f"messages dir: {MSG_DIR}")
     try:
         srv.serve_forever()

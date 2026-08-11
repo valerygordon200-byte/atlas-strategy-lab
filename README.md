@@ -1,3 +1,29 @@
+# ATLAS Strategy Lab — research + the dourmouse commercial stack
+
+This repo is two things now:
+
+1. **The research laboratory** (below): 900+ strategies through a strict
+   six-gate battery, honest verdicts, zero survivor selection.
+2. **The commercial stack**: dourmouse is the shell; **ATLAS** (backtest
+   engine + full data registry) and the **TAILSCALE FEED** (live two-machine
+   agent chat) live inside it as separate UIs.
+
+## Commercial stack — quickstart
+
+```
+setup.bat                       # one-command: clone/pull, deps, config, SMOKE TEST
+python scripts/pipeline_supervisor.py   # keeps relay/feed/worker/bridge/engine/hub alive (:8792)
+open http://127.0.0.1:8791/hub.html     # the hub: ATLAS / DOURMOUSE / FEED tabs
+```
+
+- Engine API: `:8790` — `GET /api/keys`, `GET /api/data/{key}`,
+  `POST /api/backtest` (`usdjpy_drift_k1`, `registry_gates`,
+  `golden_regressions` — the release gate).
+- Data: `E:orex-data` via `scripts/data_registry.py` (one loader, quality
+  gates on every load). See `DEPLOY.md` for the full topology, lifecycle,
+  laptop join, and security notes. Board + relay: `coordination/`, `relay/`.
+
+---
 # ATLAS Strategy Lab
 
 Probabilistic research on FX and commodity trading strategies: **900+ strategies

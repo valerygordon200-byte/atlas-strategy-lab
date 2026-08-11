@@ -14,3 +14,4 @@ relay/.bridge_*.state
 relay/participants.json
 relay/messages/
 relay/relay_config.txt
+.supervisor_*.log
