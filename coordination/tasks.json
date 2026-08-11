@@ -21,6 +21,19 @@
       "claimed": null,
       "result": null,
       "done": null
+    },
+    {
+      "id": "T3",
+      "text": "worker smoke test: list the board mechanically",
+      "priority": "mid",
+      "status": "DONE",
+      "owner": "desktop-worker",
+      "created": "2026-08-11T14:56:21+00:00",
+      "claimed": "2026-08-11T14:56:35+00:00",
+      "result": "T1   [high] TODO       Source central-bank gold net-purchase series (2015-present, monthly) from WGC/IMF/national disclosures; add to bookshelf; re-run weight_calibrator for GOLD T2   [mid ] TODO     ",
+      "done": "2026-08-11T14:56:35+00:00",
+      "cmd": "python scripts/coord.py list",
+      "dispatch": null
     }
   ],
   "log": [
@@ -43,6 +56,13 @@
       "who": "desktop-atlas",
       "event": "claim",
       "id": "T2"
+    },
+    {
+      "t": "2026-08-11T14:56:21+00:00",
+      "who": "test-driver",
+      "event": "new",
+      "id": "T3",
+      "text": "worker smoke test: list the board mechanically"
     }
   ]
 }
