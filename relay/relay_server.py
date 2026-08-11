@@ -27,13 +27,40 @@ MSG_DIR = ROOT / "messages"
 PART_FILE = ROOT / "participants.json"
 
 _lock = threading.Lock()
-_counter = [0]          # monotonic message id
 _participants = {}      # name -> last seen ts
+
+
+def load_counter():
+    cf = MSG_DIR / ".counter"
+    if cf.exists():
+        try:
+            return int(cf.read_text().strip())
+        except ValueError:
+            pass
+    # fallback: scan existing message files for the max id
+    mx = 0
+    if MSG_DIR.exists():
+        for p in MSG_DIR.glob("*.jsonl"):
+            for line in p.read_text(encoding="utf-8").splitlines():
+                if not line:
+                    continue
+                try:
+                    mx = max(mx, json.loads(line)["id"])
+                except Exception:
+                    pass
+    return mx
+
+
+_counter = [load_counter()]     # monotonic message id, persisted across restarts
 
 
 def next_id():
     with _lock:
         _counter[0] += 1
+        try:
+            (MSG_DIR / ".counter").write_text(str(_counter[0]))
+        except OSError:
+            pass
         return _counter[0]
 
 
@@ -177,9 +204,10 @@ def main():
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--token", default=os.environ.get("RELAY_TOKEN", "change-me"))
     args = ap.parse_args()
+    MSG_DIR.mkdir(exist_ok=True)
+    _counter[0] = load_counter()
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     srv.token = args.token
-    MSG_DIR.mkdir(exist_ok=True)
     print(f"relay listening on {args.host}:{args.port}  token={args.token}")
     print(f"messages dir: {MSG_DIR}")
     try:
