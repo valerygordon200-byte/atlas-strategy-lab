@@ -129,13 +129,13 @@
 
   <!-- ================= FEED ================= -->
   <section class="pane" id="pane-feed">
-    <iframe id="frameFeed" src="http://127.0.0.1:8788/"></iframe>
+    <iframe id="frameFeed" src="__FEED_URL__/"></iframe>
   </section>
 </main>
 
 <script>
 const ENGINE = "http://127.0.0.1:8790";
-const FEED   = "http://127.0.0.1:8788";
+const FEED   = "__FEED_URL__".startsWith("__") ? "http://127.0.0.1:8788" : "__FEED_URL__";
 const ENGINE_TOKEN = "__ENGINE_TOKEN__";
 const EH = ENGINE_TOKEN && ENGINE_TOKEN !== "" ? { "Content-Type": "application/json", "X-Engine-Token": ENGINE_TOKEN } : { "Content-Type": "application/json" };
 
