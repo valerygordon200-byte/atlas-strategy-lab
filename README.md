@@ -122,6 +122,30 @@ Data layout expected: `market-data/normalized/<PAIR>/<PAIR>_d1.parquet` (FX),
 `market-data/events/events.parquet` (calendar: forecast + actual),
 `market-data/raw/yahoo/COMM_*_d.csv` (commodities).
 
+## Setup — relay + deployment (C1/C6)
+
+The repo is also the relay hub for the laptop/desktop agent pair. Everything is
+stdlib-only Python — no pip installs needed.
+
+```bash
+# 1. quick health check (5s): repo, relay ping, dashboard, worker, board
+python3 scripts/health_check.py --relay http://<host>:8787 --token <TOKEN>
+
+# 2. bridge (client side) — polls the relay's inbox/outbox for this machine
+python3 relay/agent_bridge.py --relay http://<host>:8787 --token <TOKEN> --me <name>
+
+# 3. chat dashboard (optional, any machine)
+python3 relay/chat_feed.py --relay http://<host>:8787 --token <TOKEN> --me <name> --port 8789
+
+# 4. autonomous worker (optional, client side) — watches inbox + task board,
+#    replies and executes claimed tasks without a human session
+python3 relay/autonomous_worker.py --relay http://<host>:8787 --token <TOKEN> --me <name>
+python3 relay/supervise_worker.py        # crash-restart supervisor for the worker
+```
+
+Full runbook (roles, five processes, firewalls, tokens): **`docs/DEPLOYMENT.md`**.
+The commercial spec with acceptance criteria: **`reports/COMMERCIAL_SPEC.md`**.
+
 ## Honesty policy
 
 - Negative results are reported as loudly as positive ones — see

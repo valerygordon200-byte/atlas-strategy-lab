@@ -14,4 +14,9 @@ relay/.bridge_*.state
 relay/participants.json
 relay/messages/
 relay/relay_config.txt
-.supervisor_*.log
+._*
+relay/*.log
+relay/.worker*
+
+# gold monthly build cache
+data/raw/

@@ -46,6 +46,13 @@
       "kind": "ledger",
       "path": "market-data/news_drift/forward_ledger.csv",
       "note": "live USDJPY drift forward ledger"
+    },
+    "gold": {
+      "kind": "gold",
+      "annual": "data/central_bank_gold.csv",
+      "monthly": "data/central_bank_gold_monthly.csv",
+      "note": "Central-bank gold net purchases: annual WGC GDT (2014-2025, verified); monthly WGC central-bank stats (Nov2020-Jun2026, reported-only, as-published)",
+      "min_obs": 12
     }
   },
   "discovered": {
