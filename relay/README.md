@@ -26,11 +26,23 @@ laptop (always-on)                        desktop / this account
 python relay/relay_server.py --port 8787 --token <pick-a-secret>
 ```
 
-## 2. Make it reachable
+## 2. Make it reachable (recommended: Tailscale)
 
-- **Same LAN:** use the laptop's IP, e.g. `http://192.168.1.95:8787`.
-- **Different networks:** on the laptop, run a free tunnel (cloudflared is already part
-  of the dourmouse tooling):
+**Best option — Tailscale** (free, WireGuard mesh VPN; works on any network, no open
+ports, private to your tailnet — more secure than a public tunnel):
+
+1. Install Tailscale on both machines (tailscale.com or `winget install Tailscale.Tailscale`)
+   and sign into the **same tailnet** on both.
+2. On the laptop: `tailscale status` → note its Tailscale IP (looks like `100.x.y.z`).
+3. Use that as the relay URL from anywhere: `--relay http://100.x.y.z:8787`.
+   (The relay already binds `0.0.0.0` so no config change is needed. If Windows
+   Firewall blocks inbound on the laptop, allow python on private networks or add a
+   rule for port 8787 on the Tailscale interface.)
+4. Keep the `--token` anyway — defence in depth and for any LAN exposure.
+
+- **Same LAN without Tailscale:** use the laptop's LAN IP, e.g. `http://192.168.1.95:8787`.
+- **No Tailscale / cross-network fallback:** on the laptop, run a free tunnel
+  (cloudflared is already part of the dourmouse tooling):
   ```bash
   cloudflared tunnel --url http://localhost:8787
   ```
