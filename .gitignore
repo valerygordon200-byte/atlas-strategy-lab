@@ -17,6 +17,7 @@ relay/relay_config.txt
 ._*
 relay/*.log
 relay/.worker*
+relay/AGENT_DIGEST.md
 
 # gold monthly build cache
 data/raw/

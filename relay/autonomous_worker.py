@@ -7,11 +7,21 @@ replies to messages (composing answers with the local Ollama model), claims
 and executes tasks it can complete on this machine, pushes results, and
 announces every action over the relay.
 
+For every substantive message it also writes a DIGEST entry
+(relay/AGENT_DIGEST.md, git-ignored) so the main laptop agent can catch up on
+"What desktop said, what the worker replied, and what needs doing" without
+reading the whole feed::
+
+    ## 2026-08-12T17:30Z — desktop-atlas
+    SAID: <the message>
+    REPLIED: <what the worker sent back>
+    ACTION ITEMS: <LLM-extracted to-dos for the main agent>
+
 Design rules:
 - stdlib-only (urllib), no pip installs.
-- Never commits relay_config.txt / inbox_* / outbox_* / .worker_state (all
-  git-ignored). It only ever commits real artifacts (reports/, data/,
-  scripts/) and coordination/ board changes.
+- Never commits relay_config.txt / inbox_* / outbox_* / .worker_state /
+  AGENT_DIGEST.md (all git-ignored). It only ever commits real artifacts
+  (reports/, data/, scripts/) and coordination/ board changes.
 - `git pull --ff-only` before every action; push after committed actions.
 - Honest by default: claims a task ONLY when an executor is registered for
   it. Tasks that need resources this machine doesn't have (e.g. the
@@ -20,6 +30,7 @@ Design rules:
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -35,6 +46,7 @@ REPO = Path(__file__).resolve().parent.parent
 RELAY_DIR = REPO / "relay"
 STATE_FILE = RELAY_DIR / ".worker_state.json"
 LOG_FILE = RELAY_DIR / "autonomous_worker.log"
+DIGEST_FILE = RELAY_DIR / "AGENT_DIGEST.md"
 POLL_SECONDS = 10
 
 # --------------------------------------------------------------------------- #
@@ -61,7 +73,7 @@ TOKEN = CFG.get("TOKEN", "")
 INBOX = RELAY_DIR / f"inbox_{ME}.txt"
 OUTBOX = RELAY_DIR / f"outbox_{ME}.txt"
 OLLAMA = "http://127.0.0.1:11434"
-OLLAMA_MODEL = "dourmouse-finetuned"
+OLLAMA_MODEL = CFG.get("WORKER_OLLAMA_MODEL", "dourmouse-finetuned")
 
 
 # --------------------------------------------------------------------------- #
@@ -80,10 +92,10 @@ def log(msg: str) -> None:
         pass
 
 
-def send(text: str, to: str | None = None) -> None:
+def send(text: str, to: str | None = None) -> bool:
     """Targeted messages POST /send (proper `to` routing, like say.py);
     broadcasts append to the bridge outbox (the standing-behaviour channel).
-    Both durable on the relay."""
+    Both durable on the relay. Returns True on success."""
     if to is not None:
         try:
             body = json.dumps(
@@ -95,21 +107,51 @@ def send(text: str, to: str | None = None) -> None:
             )
             with urllib.request.urlopen(req, timeout=10) as r:
                 log(f"SENT to {to}: {text[:100]}")
-                return
+                return True
         except Exception as exc:  # noqa: BLE001
             log(f"direct send to {to} failed: {exc}")
     try:
         with OUTBOX.open("a") as f:
             f.write(text + "\n")
         log(f"SENT broadcast via outbox: {text[:100]}")
+        return True
     except OSError as exc:
         log(f"outbox append failed: {exc}")
+        return False
 
 
 def git(*args: str) -> str:
     return subprocess.run(
         ["git", *args], cwd=REPO, capture_output=True, text=True, timeout=60
     ).stdout.strip()
+
+
+# --------------------------------------------------------------------------- #
+# digest — what desktop said + what we did + what the main agent must do
+# --------------------------------------------------------------------------- #
+
+
+def write_digest(sender: str, said: str, replied: str, actions: list[str]) -> None:
+    """Append one digest entry so the main laptop agent can catch up fast."""
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    lines = [
+        f"## {ts} — {sender}",
+        f"SAID: {said.strip()[:800]}",
+        f"REPLIED: {replied.strip()[:400]}",
+    ]
+    if actions:
+        lines.append("ACTION ITEMS (for the main agent):")
+        for a in actions:
+            lines.append(f"- {a.strip()[:300]}")
+    else:
+        lines.append("ACTION ITEMS: none flagged by the worker.")
+    lines.append("")
+    try:
+        with DIGEST_FILE.open("a", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+        log(f"DIGEST: entry appended for {sender}")
+    except OSError as exc:
+        log(f"digest write failed: {exc}")
 
 
 # --------------------------------------------------------------------------- #
@@ -143,7 +185,7 @@ def _save_state(state: dict) -> None:
 # --------------------------------------------------------------------------- #
 
 
-def _ollama_generate(prompt: str, max_tokens: int = 300) -> str:
+def _ollama_generate(prompt: str, max_tokens: int = 400) -> str:
     body = json.dumps(
         {
             "model": OLLAMA_MODEL,
@@ -155,7 +197,7 @@ def _ollama_generate(prompt: str, max_tokens: int = 300) -> str:
     req = urllib.request.Request(
         OLLAMA + "/api/generate", data=body, headers={"Content-Type": "application/json"}
     )
-    with urllib.request.urlopen(req, timeout=120) as r:
+    with urllib.request.urlopen(req, timeout=180) as r:
         return json.load(r).get("response", "").strip()
 
 
@@ -176,29 +218,58 @@ def _repo_facts() -> str:
     return "\n".join(facts)
 
 
-def compose_answer(question: str) -> str:
+_ACTION_RE = re.compile(r"^ACTION ITEMS?[:\-]\s*(.*)$", re.I | re.M)
+_ITEM_RE = re.compile(r"^\s*(?:[-*]|\d+[.)])\s*(.+)$")
+
+
+def compose_answer(question: str) -> tuple[str, list[str]]:
+    """Compose a reply AND extract action items with the local model.
+
+    Returns (reply, action_items). Falls back to a template + empty actions
+    if the model is unavailable — never crashes the loop."""
     facts = _repo_facts()
     prompt = (
-        "You are the laptop-dourmouse autonomous relay agent on the "
-        "ATLAS/DOURMOUSE team. A peer sent this message: "
+        "You are laptop-dourmouse, the laptop-side autonomous relay agent on "
+        "the ATLAS/DOURMOUSE team (a two-machine commercial product build: "
+        "desktop-atlas has the Windows machine + E:/forex-data, you have the "
+        "Mac with Ollama + the repo). A peer sent this message:\n\n"
         f"{question!r}\n\n"
         "Facts about the laptop side and the repo (use ONLY these, never invent):\n"
         f"{facts}\n\n"
-        "Write a concise, warm reply (max 4 sentences). If the facts do not "
-        "answer the question, say honestly what you know and offer to check "
-        "with the desktop side. No preamble, no emojis."
+        "Write a concise, warm reply to that peer (max 4 sentences). If the "
+        "facts do not answer the question, say honestly what you know and offer "
+        "to check with the main agent.\n"
+        "Then on its own lines write ACTION ITEMS for the MAIN agent (things "
+        "the main laptop session must actually do in response) as a numbered "
+        "or bulleted list, or 'ACTION ITEMS: none' if nothing needs doing.\n"
+        "No preamble, no emojis."
     )
     try:
-        ans = _ollama_generate(prompt)
-        if ans:
-            return ans[:600]
+        raw = _ollama_generate(prompt)
+        if not raw:
+            raise RuntimeError("empty model response")
     except Exception as exc:  # noqa: BLE001
         log(f"LLM unavailable ({exc}) — using template reply")
-    return (
-        "Laptop side is up and monitoring the relay (machine: adits-macbook-air, "
-        "tailnet 100.84.156.49). Board + inbox are being watched continuously. "
-        "Recent repo activity: " + (git("log", "--oneline", "-3") or "none")
-    )
+        return (
+            "Laptop side is up and monitoring the relay (machine: adits-macbook-air, "
+            "tailnet 100.84.156.49). Board + inbox are being watched continuously. "
+            "Recent repo activity: " + (git("log", "--oneline", "-3") or "none"),
+            [],
+        )
+    # Split the reply (first block) from action items.
+    m = _ACTION_RE.search(raw)
+    if m:
+        reply = raw[: m.start()].strip()
+        actions = [
+            _ITEM_RE.match(ln).group(1)
+            for ln in raw[m.start():].splitlines()
+            if (match := _ITEM_RE.match(ln))
+        ]
+        actions = [a for a in actions if a.lower() != "none"]
+    else:
+        reply = raw
+        actions = []
+    return (reply[:600] or "Acknowledged.", actions[:8])
 
 
 # --------------------------------------------------------------------------- #
@@ -209,59 +280,83 @@ _MSG_RE = re.compile(r"^\[([^\]]+)\]\s*([^:]+):\s*(.*)$", re.S)
 
 # Mechanical traffic that must NEVER get a reply — replying to an auto-ack or
 # a "noted" creates an infinite ping-pong between the two workers' loops.
-_SKIP_PREFIXES = ("auto-ack", "noted (", "received ", "received)")
-_HEARTBEAT = ("online — autonomous executor standing by", "standing by")
-
-
-def _is_question(text: str) -> bool:
-    low = text.lower()
-    return any(
-        k in low
-        for k in ("?", "status", "summary", "what have you", "what are you",
-                  "report", "how are", "update", "list", "working on")
-    )
+_SKIP_PREFIXES = ("auto-ack", "noted (", "received ", "received)", "auto-reply (")
+_HEARTBEATS = ("online — autonomous executor standing by", "standing by",
+               "worker online", "worker: online")
+# Ack-template echoes from the other worker's auto-reply ("...worker is on
+# it. (Full handling...)") — answering them creates infinite ping-pong.
+_ACK_TEMPLATE = "worker is on it"
 
 
 def _is_mechanical(body: str) -> bool:
     low = body.lower()
     if any(low.startswith(p) for p in _SKIP_PREFIXES):
         return True
-    if any(h in low for h in _HEARTBEAT):
+    if any(h in low for h in _HEARTBEATS):
+        return True
+    # Ack-template echoes from the other side's auto-reply — replying feeds
+    # an infinite ack ping-pong between the two workers.
+    if _ACK_TEMPLATE in low and "full handling" in low:
+        return True
+    # supervisor restart notices are operational noise, not conversation.
+    if low.startswith("supervisor:"):
         return True
     return False
+
+
+def _is_our_own(body: str) -> bool:
+    low = body.lower()
+    # The worker's own broadcasts / ack template echoed back.
+    return low.startswith("laptop-dourmouse-worker") or "laptop side is up" in low
+
+
+def _split_messages(text: str) -> list[str]:
+    """Split the inbox file into messages. Desktop's messages often contain
+    embedded newlines, so a message runs from a '[ts] sender:' line until the
+    next line that starts with '[' (a new timestamp header)."""
+    lines = text.splitlines()
+    msgs: list[str] = []
+    current: list[str] = []
+    for ln in lines:
+        if ln.startswith("[") and "] " in ln:
+            if current:
+                msgs.append("\n".join(current))
+            current = [ln]
+        else:
+            if current:
+                current.append(ln)
+            # A stray line before any header is dropped (rotated feed edge).
+    if current:
+        msgs.append("\n".join(current))
+    return msgs
 
 
 def handle_message(text: str, state: dict) -> None:
     m = _MSG_RE.match(text)
     if not m:
-        log(f"unparsed inbox line: {text[:80]}")
+        log(f"unparsed inbox block: {text[:80]}")
         return
     sender = m.group(2).strip()
     body = m.group(3).strip()
     if sender == ME:
         return  # never reply to ourselves (broadcast echoes)
+    if _is_our_own(body):
+        log(f"own echo from {sender} — skipping")
+        return
     h = hashlib.sha256(f"{sender}:{body}".encode()).hexdigest()[:16]
     if state["seen"].get(h):
         return
     state["seen"][h] = time.time()
-    log(f"MSG from {sender}: {body[:120]}")
+    log(f"MSG from {sender}: {body[:140]}")
     if _is_mechanical(body):
         log(f"  (mechanical — no reply to break ack ping-pong)")
+        write_digest(sender, body, "worker skipped (mechanical traffic)", [])
         return
-    # Addressed to us, or a directive (claim/please/reply/report/do) that
-    # needs a one-time acknowledgment; questions get a composed answer.
-    low = body.lower()
-    addressed = "laptop-dourmouse" in low or "@laptop" in low
-    directive = any(
-        k in low for k in ("claim ", "please ", "reply with", "report ",
-                           "do this", "your task", "your side", "for you")
-    )
-    if _is_question(body):
-        answer = compose_answer(body)
-        send(f"@{sender} {answer}")
-    elif addressed or directive:
-        send(f"@{sender} Acknowledged — laptop-dourmouse worker is on it. "
-             f"(Full handling happens when the laptop session is active.)")
+    # Every substantive message gets an LLM-composed reply + action items.
+    reply, actions = compose_answer(body)
+    ok = send(f"@{sender} {reply}", to=sender)
+    status = "sent" if ok else "QUEUED (relay send failed)"
+    write_digest(sender, body, f"{status}: {reply}", actions)
 
 
 # --------------------------------------------------------------------------- #
@@ -296,10 +391,6 @@ def _read_board() -> dict[str, dict]:
 # Executor registry: task id or title keyword -> callable(board_task) -> result str.
 # Only tasks this laptop can genuinely complete get executors. Everything else
 # is left for the desktop worker (who has E:/forex-data).
-def _executor_placeholder(task: dict) -> str:
-    return f"laptop has no executor for: {task['text'][:80]}"
-
-
 EXECUTORS: dict[str, object] = {}
 
 
@@ -320,7 +411,7 @@ def handle_board(state: dict) -> None:
             log(f"board: {tid} TODO — no laptop executor, leaving for desktop side")
             continue
         log(f"board: claiming {tid}: {task['text'][:80]}")
-        claim = subprocess.run(
+        subprocess.run(
             [sys.executable, str(REPO / "scripts" / "coord.py"), "claim",
              "--me", ME, tid],
             cwd=REPO, capture_output=True, text=True, timeout=60,
@@ -375,39 +466,55 @@ def _acquire_lock() -> None:
     LOCK_FILE.write_text(str(os.getpid()))
 
 
-
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--once", action="store_true",
+                    help="process the current inbox once, then exit (testing)")
+    ap.add_argument("--reset-watermark", action="store_true",
+                    help="start from the current inbox tail (skip old backlog)")
+    args = ap.parse_args()
+
     _acquire_lock()
     log(f"laptop worker up: me={ME} relay={RELAY} poll={POLL_SECONDS}s")
     send(f"laptop-dourmouse-worker online — autonomous executor standing by")
     state = _load_state()
+
+    if args.reset_watermark and INBOX.is_file():
+        n = len(_split_messages(INBOX.read_text(encoding="utf-8", errors="replace")))
+        log(f"reset watermark: {state.get('inbox_lines', 0)} -> {n} (skip backlog)")
+        state["inbox_lines"] = n
+        _save_state(state)
+
     while True:
         try:
             git("pull", "--ff-only")
             if INBOX.is_file():
-                lines = INBOX.read_text().splitlines()
-                if len(lines) < state["inbox_lines"]:
+                text = INBOX.read_text(encoding="utf-8", errors="replace")
+                msgs = _split_messages(text)
+                if len(msgs) < state["inbox_lines"]:
                     # The feed was cleared/rotated (e.g. the desktop wiping
                     # the chat) — the line-count watermark would otherwise
                     # blind us to new messages forever.
                     log(
-                        f"inbox shrank ({state['inbox_lines']} -> {len(lines)}) — "
+                        f"inbox shrank ({state['inbox_lines']} -> {len(msgs)}) — "
                         "feed cleared; resetting watermark"
                     )
                     state["inbox_lines"] = 0
                     state["seen"] = {}
                     _save_state(state)
-                if len(lines) > state["inbox_lines"]:
-                    for line in lines[state["inbox_lines"] :]:
-                        handle_message(line, state)
+                if len(msgs) > state["inbox_lines"]:
+                    for msg in msgs[state["inbox_lines"]:]:
+                        handle_message(msg, state)
                         _save_state(state)  # crash-safe: never re-ack
-                    state["inbox_lines"] = len(lines)
+                    state["inbox_lines"] = len(msgs)
                     _save_state(state)
             handle_board(state)
             _save_state(state)
         except Exception as exc:  # noqa: BLE001
             # The loop never dies: log the error, sleep, retry.
             log(f"loop error (continuing): {exc}")
+        if args.once:
+            break
         time.sleep(POLL_SECONDS)
 
 
