@@ -68,7 +68,10 @@ def main():
                 line = f"[{m['ts']}] {m['from']}: {m['msg']}\n"
                 with open(inbox, "a", encoding="utf-8") as f:
                     f.write(line)
-                print(line.rstrip(), flush=True)
+                try:
+                    print(line.rstrip(), flush=True)
+                except UnicodeEncodeError:
+                    pass  # console charset (cp1252) can't print some glyphs
             if d.get("msgs"):
                 last_id = d["max_id"]
                 state.write_text(str(last_id))
@@ -79,7 +82,7 @@ def main():
         try:
             size = outbox.stat().st_size
             if size > sent_offset:
-                with open(outbox, "r", encoding="utf-8") as f:
+                with open(outbox, "r", encoding="utf-8", errors="replace") as f:
                     f.seek(sent_offset)
                     lines = f.read().splitlines()
                 for line in lines:

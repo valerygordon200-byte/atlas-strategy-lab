@@ -73,7 +73,9 @@ TOKEN = CFG.get("TOKEN", "")
 INBOX = RELAY_DIR / f"inbox_{ME}.txt"
 OUTBOX = RELAY_DIR / f"outbox_{ME}.txt"
 OLLAMA = "http://127.0.0.1:11434"
-OLLAMA_MODEL = CFG.get("WORKER_OLLAMA_MODEL", "dourmouse-finetuned")
+OLLAMA_MODEL = CFG.get("WORKER_OLLAMA_MODEL", CFG.get("OLLAMA_MODEL", "dourmouse-finetuned"))
+HOST_DESC = CFG.get("HOST_DESC", "the ATLAS/DOURMOUSE relay host")
+WORKER_BOARD = CFG.get("WORKER_BOARD", "1") == "1"
 
 
 # --------------------------------------------------------------------------- #
@@ -111,8 +113,8 @@ def send(text: str, to: str | None = None) -> bool:
         except Exception as exc:  # noqa: BLE001
             log(f"direct send to {to} failed: {exc}")
     try:
-        with OUTBOX.open("a") as f:
-            f.write(text + "\n")
+        with OUTBOX.open("a", encoding="utf-8") as f:
+            f.write(text.replace("\n", " ") + "\n")
         log(f"SENT broadcast via outbox: {text[:100]}")
         return True
     except OSError as exc:
@@ -508,7 +510,8 @@ def main() -> None:
                         _save_state(state)  # crash-safe: never re-ack
                     state["inbox_lines"] = len(msgs)
                     _save_state(state)
-            handle_board(state)
+            if WORKER_BOARD:
+                handle_board(state)
             _save_state(state)
         except Exception as exc:  # noqa: BLE001
             # The loop never dies: log the error, sleep, retry.
