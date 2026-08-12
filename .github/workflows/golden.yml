@@ -1,0 +1,44 @@
+name: atlas golden regressions
+
+on:
+  push:
+    branches: [main]
+    paths: ["scripts/golden_regressions.py", "scripts/data_registry.py"]
+  workflow_dispatch:
+
+# T10: the three locked research results (hog seasonal void, USDJPY news
+# drift, dual momentum) are the Lab's credibility chain. Any gate failure
+# = release blocker. The suite recomputes from a data root passed via
+# --base (golden_regressions.py, made portable 2026-08-12).
+#
+# The data root is supplied through the GOLDEN_DATA_ROOT repository
+# variable (a checked-out data dir path, or a future artifact download).
+# Until a variable is configured the job skips with success — it becomes
+# an enforced release blocker the moment data is wired.
+jobs:
+  golden:
+    name: golden regressions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas
+
+      - name: Run the golden suite
+        env:
+          GOLDEN_DATA_ROOT: ${{ vars.GOLDEN_DATA_ROOT }}
+        run: |
+          if [ -n "$GOLDEN_DATA_ROOT" ]; then
+            python scripts/golden_regressions.py --base "$GOLDEN_DATA_ROOT" --json "$RUNNER_TEMP/golden.json"
+            echo "golden suite ran against $GOLDEN_DATA_ROOT"
+          else
+            echo "GOLDEN_DATA_ROOT repository variable not set — golden suite skipped with success."
+            echo "Set the variable (a data-root path reachable on the runner) to enforce the release blocker in CI."
+          fi

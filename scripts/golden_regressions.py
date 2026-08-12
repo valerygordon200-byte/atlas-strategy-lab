@@ -34,7 +34,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-BASE = Path("E:/forex-data")
+BASE = Path("E:/forex-data")  # overridable via --base (CI portability)
 OUT = BASE / "reports"
 
 LOCKED = {
@@ -131,9 +131,20 @@ def check_dual_momentum() -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--base", default=None,
+                    help="market-data root (default: E:/forex-data). CI passes a "
+                         "checked-out/fixture root so the golden suite runs "
+                         "without the pen drive.")
     ap.add_argument("--json", default=str(OUT / "golden_regressions.json"))
     ap.add_argument("--md", default=str(OUT / "golden_regressions.md"))
     args = ap.parse_args()
+
+    if args.base:
+        globals()["BASE"] = Path(args.base)
+        globals()["OUT"] = Path(args.base) / "reports"
+        # Re-point the derived defaults that were evaluated at import time.
+        args.json = str(globals()["OUT"] / "golden_regressions.json")
+        args.md = str(globals()["OUT"] / "golden_regressions.md")
 
     t0 = time.time()
     checks = [check_hog(), check_drift(), check_dual_momentum()]
