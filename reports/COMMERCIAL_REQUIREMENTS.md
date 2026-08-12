@@ -1,6 +1,14 @@
 # COMMERCIAL REQUIREMENTS — dourmouse + ATLAS
 
-Status: v1, 2026-08-11. The full requirement list for turning the system into
+> ⚠️ **SUPERSEDED (2026-08-12)** — the commercial direction has moved to
+> small-business workflow automation per `reports/DOURMOUSE_COMMERCIAL_PLAN.md`
+> and `reports/DOURMOUSE_SCALING_PLAN.md`. Atlas is parked (not productized),
+> the mesh is internal tooling. This doc is kept as archived record; its
+> reusable items (token rotation, secrets audit, Windows port, compliance kit,
+> installers) are folded into the scaling plan. Do not use this as the current
+> requirement list.
+
+Status: v1, 2026-08-11 (SUPERSEDED). Archived record of the Atlas-led sell plan. The full requirement list for turning the system into
 a product people can buy. Every requirement has: ID, priority, owner, effort,
 and an acceptance gate. Priorities: **P0 = launch blocker**, P1 = launch-critical,
 P2 = should-have, P3 = later stage.
