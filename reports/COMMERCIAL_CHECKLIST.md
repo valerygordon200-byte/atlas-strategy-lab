@@ -1,6 +1,11 @@
 # COMMERCIAL EXECUTION CHECKLIST
 
-Working document. Every box is a concrete, verifiable action. Tick as you go.
+> ⚠️ **SUPERSEDED (2026-08-12)** — see `reports/DOURMOUSE_SCALING_PLAN.md` for
+> the current execution plan (workflow-automation product, Phase 0–4). Items
+> carried forward (token rotation, secrets audit, Windows test port, CI) are
+> Phase 0 there. Kept as archived record.
+
+Working document (SUPERSEDED — archived). Every box is a concrete, verifiable action. Tick as you go.
 Order = dependency order. Source: reports/COMMERCIAL_REQUIREMENTS.md.
 Owner shorthand: **ME** = desktop agent, **LAP** = laptop agent, **YOU** = human.
 
