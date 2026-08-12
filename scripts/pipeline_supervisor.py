@@ -37,6 +37,34 @@ TOKEN = re.search(r"^TOKEN=(.+)$", TOKEN, re.M).group(1).strip() if TOKEN else "
 
 PY = sys.executable
 
+# Windows venv python.exe is a two-process redirector (launcher + base
+# interpreter share the command line, so process scans see 2 pids and dedup
+# kills the real worker). Run the base interpreter with the venv's
+# site-packages on PYTHONPATH instead - one process, same deps.
+VENV_SP = DM / ".venv" / "Lib" / "site-packages"
+FX = Path("E:/forex-data") if Path("E:/forex-data").exists() else ROOT.parent / "forex-data"
+
+
+def _env_file(path: Path) -> dict:
+    """Load KEY=VALUE lines from a .env file (no shell interpolation)."""
+    out: dict = {}
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            out[k.strip()] = v.strip()
+    except OSError:
+        pass
+    return out
+
+
+DM_ENV = _env_file(DM / ".env")
+if VENV_SP.is_dir():
+    old = DM_ENV.get("PYTHONPATH", "")
+    DM_ENV["PYTHONPATH"] = str(VENV_SP) + (os.pathsep + old if old else "")
+
 SERVICES = [
     {"name": "relay", "cwd": ROOT, "health": "http://127.0.0.1:8787/ping",
      "cmd": [PY, "relay/relay_server.py", "--port", "8787", "--token", TOKEN]},
@@ -57,6 +85,21 @@ SERVICES = [
      "env": {"HUB_ENGINE_TOKEN": TOKEN}},
     {"name": "notify", "cwd": ROOT, "health": None, "pattern": "notify_watch",
      "cmd": [PY, "relay/notify_watch.py", "--poll", "5"]},
+    {"name": "autonomous", "cwd": ROOT, "health": None, "pattern": "autonomous_worker",
+     "dedup": "autonomous_worker",
+     "cmd": [PY, "relay/autonomous_worker.py"]},
+    {"name": "events", "cwd": FX, "health": None, "pattern": "event_watcher",
+     "dedup": "event_watcher",
+     "dedup_keep": FX / "market-data" / "events" / "watcher.pid",
+     "cmd": [PY, "scripts/event_watcher.py", "--watch", "--price-source", "frank"]},
+    {"name": "watchdm", "cwd": DM, "health": None, "pattern": "watch_dourmouse",
+     "dedup": "watch_dourmouse",
+     "dedup_keep": DM / "workspace" / "watch_dourmouse.pid",
+     "cmd": [PY, "tools/watch_dourmouse.py", "--interval", "10",
+             "--single-instance"]},
+    {"name": "webui", "cwd": DM, "health": "http://127.0.0.1:8765/",
+     "dedup": "dourmouse.webui",
+     "cmd": [PY, "-m", "dourmouse.webui"]},
 ]
 
 STATE: dict[str, dict] = {}
@@ -102,11 +145,39 @@ def kill_pids(pattern: str) -> None:
                        capture_output=True, text=True, timeout=15)
 
 
+def _dedup(svc: dict) -> None:
+    """Kill duplicate PIDs for a service beyond the one that must survive
+    (accumulated duplicates from crashes/restarts otherwise pile up on one
+    port). When the service keeps its own pid file (watchers), the pid it
+    records is always the one that survives - killing it would just start
+    the restart loop over."""
+    pat = svc.get("dedup") or svc.get("pattern")
+    if not pat:
+        return
+    pids = proc_pids(pat)
+    if len(pids) < 2:
+        return
+    keep: set[int] = set()
+    keep_pidfile = svc.get("dedup_keep")
+    if keep_pidfile:
+        try:
+            keep.add(int(Path(keep_pidfile).read_text(encoding="utf-8").strip() or 0))
+        except (OSError, ValueError):
+            pass
+    for pid in pids:
+        if pid in keep:
+            continue
+        subprocess.run(["taskkill", "/F", "/PID", str(pid)],
+                       capture_output=True, text=True, timeout=15)
+        print(f"[{now()}] DEDUP {svc['name']}: killed extra pid {pid}")
+
+
 def start(svc: dict) -> None:
     cwd = svc["cwd"]
     cwd.mkdir(parents=True, exist_ok=True)
     flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
-    env = {**os.environ, **svc.get("env", {})}
+    base_env = DM_ENV if str(svc["cwd"]).lower() == str(DM).lower() else {}
+    env = {**os.environ, **base_env, **svc.get("env", {})}
     with open(cwd / (".supervisor_" + svc["name"] + ".log"), "a",
               encoding="utf-8") as log:
         subprocess.Popen(svc["cmd"], cwd=str(cwd), stdout=log, stderr=log,
@@ -140,6 +211,7 @@ def supervise() -> None:
                                "restarts": 0})
         up = is_up(svc)
         st["up"] = up
+        _dedup(svc)
         if svc.get("health"):
             pass
         elif up:
