@@ -1,45 +1,48 @@
-# Laptop relay status — 2026-08-12 12:55Z
+# Laptop relay status — 2026-08-12 17:10Z
 
 Read by the desktop worker on next pull. **No secrets in this file.**
 
 ## State
 
-- Token rotation (11:08Z) was verified and closed; laptop daemons run on the
-  NEW token. **As of 12:46Z the relay returns 403 for BOTH the old and the new
-  token from the laptop** — the relay appears to have rotated (or restarted
-  with) a third token. Laptop is locked out of /all and /recv and cannot post
-  until it holds the current token. Bridge + feed are alive and retrying; the
-  instant the relay accepts the NEW token `ccVo_...`, the laptop reconnects
-  automatically. If desktop rotated again, please post the current token (or
-  point the relay back at `ccVo_...`) — everything else is in place.
+- **v5.20 CHECKPOINT + RECONCILIATION COMPLETE — the merge chain is done.**
+  The human green-lit the checkpoint; laptop executed the full plan:
 
-## Commercial push — laptop next steps (the plan desktop asked for)
+  1. **Checkpoint committed** `05fdf11` — all ~180 uncommitted files (fast
+     lane, offline shell, v2 training pipeline, verdict + speed reports,
+     build_dist.sh, portfolio). Audited before commit: no secrets, no
+     AppleDouble junk (new `._*` gitignore guard), nested atlas repo +
+     .freebuff tooling excluded.
+  2. **Bundle re-extracted + fetched** — `desktop-main` now at the fresh
+     head `31a217d` (was stale at 4a8c79e on disk).
+  3. **Merge complete** `6be3a9c` — desktop's Windows port, CI workflow,
+     packaging fix, legal docs, and the 8 new agents (forex/t212/mt5/
+     atlas_ui/atlas_cmd/docs/extract/schedules) are all in, alongside the
+     laptop's freebuff/worldmonitor/spotify/atlas-lab/allhands. 9 conflicts
+     resolved additively (both sides' features kept).
+  4. **Suite green after merge** — 1415 + 110 passed, 0 failed, 2 skipped.
+     Fixed along the way: portable `sys.executable` instead of `"python"`
+     in atlas_command/forex_ops/atlas_terminal (would have broken the CI
+     matrix on mac/ubuntu), pypdf installed + added `requirements-extract.txt`
+     to the CI install step, loopback allowed in test_ui_local, roster test
+     sets unioned.
+  5. **PUSHED to dourmouse origin** `c6d3051..6be3a9c` — GitHub's dourmouse
+     was stale at v5.4; it now carries the merged tree INCLUDING
+     `.github/workflows/tests.yml` (3-OS matrix). **CI is armed** — the
+     workflow activates on this push and blocks on any failure.
 
-Desktop lane (features, packaging audit, legal, CI draft, bundle) is received
-and acknowledged — thank you, the 11:17Z wrap was fully read. Laptop lane,
-in priority order:
+## Remaining on the commercial checklist
 
-1. **Dist leak gate (hard release blocker).** Laptop's `build_dist.sh` still
-   ships `workspace/` wholesale (lines 115-118) — exactly the leak the audit
-   banned. Laptop will apply the same include-list + fail-loud leak gate as
-   desktop's `d7a2d41` (exclude workspace/, .env*, relay_config.txt,
-   *_secrets*, *.db, tools/ unless whitelisted).
-2. **Model-regression gate (hard release blocker).** Adding the locked-model
-   strict-JSON gate (<90% on the 13-task suite = release blocker) to
-   `golden_regressions.py` alongside the finance checks, per the 1155
-   acceptance condition.
-3. **v5.20 checkpoint (human-gated).** The laptop tree's ~180 uncommitted
-   files still await the human's go-ahead. This unblocks the bundle merge →
-   dourmouse origin push (arms CI) → pastel WCAG AA pass. Desktop's refreshed
-   bundle (head 31a217d, atlas 32f6f1d) is noted; laptop will re-extract it
-   at merge time — the on-disk bundle is currently stale at 4a8c79e.
-4. **3B action-model counter (still open).** Desktop's position on verdict
-   1168 (train the 3B pivot action model on GPU, keep 7B as dispatcher) is
-   awaited; laptop has the v2 dataset (877 rows) + GPU config ready.
+- **Pastel WCAG AA pass** (P1, accepted as BETA-token condition).
+- **Model-regression gate** in golden_regressions.py (strict-JSON <90% on
+  the 13-task suite = release blocker; desktop's 1155 acceptance condition).
+- **3B action-model counter** (verdict 1168) — desktop's position still
+  awaited.
+- Relay token: laptop is still locked out (both tokens 403 as of 17:10Z);
+  bridge + feed retry automatically. Please post the current relay token or
+  point the relay back at `ccVo_...`.
 
 ## Still open
 
 - Desktop's counter on the 3B action-model plan (verdict 1168).
-- The bundle merge / Windows-port patch — blocked on the human's v5.20
-  checkpoint decision (laptop tree's uncommitted files).
-- Relay token state (see above) — laptop currently cannot post.
+- Relay token state — laptop currently cannot post to the feed.
+- Pastel WCAG AA pass (P1) + model-regression gate (release blocker).
