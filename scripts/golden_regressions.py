@@ -19,6 +19,13 @@ The release blocker. Recomputed from the drive data every run:
 Any gate failing => exit code 1 + a loud FAIL line. Runs in seconds
 (no heavy permutations — those live in the full batteries).
 
+MODEL TWIN (T12, also a release blocker): the locked-model regression gate
+lives in scripts/model_gate.py — re-runs the 13-task strict-JSON suite against
+the LOCKED production model (`dourmouse-finetuned`, verified 5/5 = 100% on
+the held-out split) and fails loudly below a 90% strict-JSON rate. Run both
+before any release:
+  python golden_regressions.py && python model_gate.py
+
 Run:  python golden_regressions.py [--json reports/golden_regressions.json]
 """
 from __future__ import annotations
@@ -45,6 +52,12 @@ LOCKED = {
     "dm_ho_mean": 2.12,        # %/mo
     "dm_ho_t": 4.51,
 }
+
+# The locked production model (T12 gate target, see scripts/model_gate.py).
+# Desktop's 1155 acceptance, on record: "Log it in the golden regressions
+# as the locked model — a model-regression gate: strict-JSON <90% on the
+# 13-task suite = release blocker."
+LOCKED_MODEL = "dourmouse-finetuned"  # 5/5 = 100% on held-out split
 
 
 # --------------------------------------------------------------------------
@@ -154,6 +167,8 @@ def main() -> int:
     report = {
         "generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "all_pass": all_ok, "runtime_s": round(dt, 1),
+        "locked_model": LOCKED_MODEL,
+        "model_gate": "see scripts/model_gate.py (T12, same release-blocker tier)",
         "checks": checks,
     }
     Path(args.json).parent.mkdir(parents=True, exist_ok=True)
