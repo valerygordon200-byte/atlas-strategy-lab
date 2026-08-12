@@ -20,3 +20,7 @@ relay/.worker*
 
 # gold monthly build cache
 data/raw/
+
+# supervisor/logs
+.supervisor*.log
+.supervisor*.err.log
