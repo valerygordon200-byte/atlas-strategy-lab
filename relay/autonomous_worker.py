@@ -231,10 +231,10 @@ def compose_answer(question: str) -> tuple[str, list[str]]:
     if the model is unavailable — never crashes the loop."""
     facts = _repo_facts()
     prompt = (
-        "You are laptop-dourmouse, the laptop-side autonomous relay agent on "
+        f"You are {ME}, the {ME.split(chr(45))[0]}-side autonomous relay agent on "
         "the ATLAS/DOURMOUSE team (a two-machine commercial product build: "
-        "desktop-atlas has the Windows machine + E:/forex-data, you have the "
-        "Mac with Ollama + the repo). A peer sent this message:\n\n"
+        "desktop-atlas has the Windows machine + E:/forex-data, laptop-dourmouse "
+        "has the Mac with Ollama + the repo). A peer sent this message:\n\n"
         f"{question!r}\n\n"
         "Facts about the laptop side and the repo (use ONLY these, never invent):\n"
         f"{facts}\n\n"
@@ -309,7 +309,7 @@ def _is_mechanical(body: str) -> bool:
 def _is_our_own(body: str) -> bool:
     low = body.lower()
     # The worker's own broadcasts / ack template echoed back.
-    return low.startswith("laptop-dourmouse-worker") or "laptop side is up" in low
+    return low.startswith(f"{ME}-worker") or "worker is on it" in low
 
 
 def _split_messages(text: str) -> list[str]:
@@ -419,7 +419,7 @@ def handle_board(state: dict) -> None:
             cwd=REPO, capture_output=True, text=True, timeout=60,
         )
         git("add", "coordination")
-        git("commit", "-m", f"laptop-dourmouse claims {tid}", "--no-verify")
+        git("commit", "-m", f"{ME} claims {tid}", "--no-verify")
         git("push")
         send(f"worker: claimed {tid} — {task['text'][:100]}")
         try:
@@ -433,7 +433,7 @@ def handle_board(state: dict) -> None:
             cwd=REPO, capture_output=True, text=True, timeout=60,
         )
         git("add", "coordination")
-        git("commit", "-m", f"laptop-dourmouse done {tid}", "--no-verify")
+        git("commit", "-m", f"{ME} done {tid}", "--no-verify")
         git("push")
         send(f"worker: done {tid} — {result[:140]}")
 
@@ -460,6 +460,9 @@ def _acquire_lock() -> None:
             alive = True
         except (OSError, ProcessLookupError):
             alive = False
+        except SystemError:
+            # Windows: os.kill on a dead pid raises SystemError, not OSError
+            alive = False
         age = time.time() - LOCK_FILE.stat().st_mtime
         if alive and age < 120:
             log(f"another worker running (pid {pid}) — exiting")
@@ -478,7 +481,7 @@ def main() -> None:
 
     _acquire_lock()
     log(f"laptop worker up: me={ME} relay={RELAY} poll={POLL_SECONDS}s")
-    send(f"laptop-dourmouse-worker online — autonomous executor standing by")
+    send(f"{ME}-worker online — autonomous executor standing by")
     state = _load_state()
 
     if args.reset_watermark and INBOX.is_file():
