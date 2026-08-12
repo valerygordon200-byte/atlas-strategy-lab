@@ -236,7 +236,13 @@ def compose_answer(question: str) -> tuple[str, list[str]]:
         "desktop-atlas has the Windows machine + E:/forex-data, laptop-dourmouse "
         "has the Mac with Ollama + the repo). A peer sent this message:\n\n"
         f"{question!r}\n\n"
-        "Facts about the laptop side and the repo (use ONLY these, never invent):\n"
+        "COLLABORATION PROTOCOL (relay/COLLABORATION_PROTOCOL.md): before starting "
+        "any task, discuss the goal, risks, and open questions first — never assume. "
+        "If the peer is proposing work, reply with a brief discussion (goal + risk + "
+        "open question) rather than just an ack. If the peer reports a phase done or "
+        "asks for confirmation, confirm or raise a concern explicitly. Be transparent "
+        "about errors and limitations. No silent assumptions.\n\n"
+        "Facts about this host and the repo (use ONLY these, never invent):\n"
         f"{facts}\n\n"
         "Write a concise, warm reply to that peer (max 4 sentences). If the "
         "facts do not answer the question, say honestly what you know and offer "
@@ -252,10 +258,10 @@ def compose_answer(question: str) -> tuple[str, list[str]]:
             raise RuntimeError("empty model response")
     except Exception as exc:  # noqa: BLE001
         log(f"LLM unavailable ({exc}) — using template reply")
+        repo_line = (git("log", "--oneline", "-3") or "none").replace("\n", " | ")
         return (
-            "Laptop side is up and monitoring the relay (machine: adits-macbook-air, "
-            "tailnet 100.84.156.49). Board + inbox are being watched continuously. "
-            "Recent repo activity: " + (git("log", "--oneline", "-3") or "none"),
+            f"{HOST_DESC} is up and monitoring the relay. Board + inbox are "
+            "being watched continuously. Recent repo activity: " + repo_line,
             [],
         )
     # Split the reply (first block) from action items.
