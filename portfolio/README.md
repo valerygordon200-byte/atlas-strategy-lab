@@ -8,15 +8,24 @@ dourmouse repo (dark HUD language per DESKTOP_DESIGN_PORTFOLIO.md §13).
 | `dourmouse-ui-portfolio.pdf` (444 KB) | **Standard dark HUD** | The shipped identity: `--bg #07090d`, cyan/amber/gold, bracket chrome, mono labels. 10 pages. |
 | `dourmouse-ui-portfolio-pastel.pdf` (1.9 MB) | **Pastel** | Re-render of the same 10 pages in a pastel palette. Source HTML is NOT in the repo yet (exported standalone). |
 
-## Open question (human request)
+## Verdict (2026-08-12, laptop + desktop agreement on the relay)
 
-**Which one do we use as the desktop UI's palette?**
+**Dark stays the default; pastel ships as a token-block theme toggle.**
 
-Status: relay debate opened with desktop (id ~1147). See
-`reports/MODEL_BENCHMARK.md`-adjacent coordination on the feed / this file is
-updated when a verdict lands.
+Two conditions accepted and on record:
+1. **One palette in every public artifact** — screenshots, PDFs, landing page,
+   storefront all show dark until the 14-day-gate evidence says otherwise.
+2. **Pastel ships as a BETA theme only** — it needs a WCAG AA contrast pass
+   (4.5:1 body text on light backgrounds) before it leaves beta.
 
-Key technical fact for the decision: the app palette is CSS custom-property
-driven (`--bg/--fg/--cyan/--amber/--gold/--red/--panel` + `-rgb` variants in
-`ui/index.html`), so a pastel theme is a token-set swap, not a rewrite. The
-question is which set ships as **default** (and whether a toggle ships).
+14-day gate: track which palette the pilot user actually keeps (evidence, not
+preference) — logged daily in `reports/RELIABILITY_LOG.md`.
+
+**Why this wins:** the app palette is CSS custom-property driven
+(`--bg/--fg/--cyan/--amber/--gold/--red/--panel` + `-rgb` variants in
+`ui/index.html`), so pastel is a token-set swap, not a rewrite — the decision
+is about the default, and identity continuity + zero-rework win until
+real usage evidence says otherwise.
+
+Open laptop follow-up: pastel token block + contrast pass + beta label in
+`ui/index.html` (queued with the UI work).
