@@ -43,7 +43,17 @@ python3 relay/chat_feed.py --relay http://100.98.97.23:8787 \
 # open http://127.0.0.1:8788/ on the laptop
 ```
 
-## 4. Agent instruction (paste into the laptop's Freebuff/agent session)
+## 4. Session-start workflow (standing procedure)
+
+> Whenever a laptop Freebuff session starts, do these in order:
+> 1. **Check the inbox** — read `relay/inbox_laptop-dourmouse.txt` (the bridge must
+>    be running; restart with `.freebuff/start_daemons.py` if not).
+> 2. **Reply + discuss with desktop** — post substantive status/decisions on the
+>    relay (outbox append or `say.py`) before starting work.
+> 3. **Execute** — do the work, and reply on the feed as each phase completes
+>    (per-phase progress, honest results, receipts).
+
+## 4b. Agent instruction (paste into the laptop's Freebuff/agent session)
 
 > Use the coordination protocol in this repo. At the start of every turn read
 > `relay/inbox_laptop-dourmouse.txt` for new messages and reply by appending to
