@@ -1,0 +1,1071 @@
+From 731b1dd208320964608a992508182e8908c3cf5b Mon Sep 17 00:00:00 2001
+From: desktop-atlas <desktop@atlas.local>
+Date: Wed, 12 Aug 2026 13:42:39 +0400
+Subject: [PATCH] Windows port: suite 100% green (1024 passed, 0 failed, was 44
+ failures)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The dourmouse suite was written and proven on macOS; on Windows 44 tests
+failed. All were portability issues, not engine bugs — three classes:
+
+1. Fake-CLI fixtures were POSIX bash scripts Windows can't execute
+   (WinError 193). Claude/codex fakes are now .cmd shims on Windows; the
+   atlas fake is a real interpreter copy + a real atlas.ops.cli module in
+   the fake repo (the exact subprocess path production takes), with
+   PYTHONHOME silencing the copied interpreter's prefix warning.
+2. Files read with the process-default cp1252 codec mangled UTF-8 content
+   (em-dashes became mojibake). All text reads now pass encoding="utf-8"
+   explicitly, in both production and test helpers. Also found a real
+   production bug this exposed: os.sysconf doesn't exist on Windows — the
+   system-info memory line now uses GlobalMemoryStatusEx via ctypes.
+3. POSIX path semantics don't hold on Windows. Repo-index facts are now
+   POSIX-normalized (shared knowledge must look identical everywhere);
+   the system-access guard gained Windows system roots (C:\Windows,
+   Program Files, ProgramData) matched case-insensitively — a real
+   security gap, not just a test fix; path-guard tests are now
+   platform-aware; a "terminal command" query routes deterministically to
+   the system agent via the domain table (was tie-breaking to atlas_cmd).
+
+Also fixed: the upload handler now drains the request body before
+rejecting a bad filename — Windows closes a socket holding unread
+received data via RST, so clients saw ConnectionAbortedError (WinError
+10053) instead of the 400 response.
+---
+ dourmouse/atlas_cli.py                  |  2 +-
+ dourmouse/atlas_ops.py                  |  2 +-
+ dourmouse/chat.py                       |  8 ++--
+ dourmouse/general_roster.py             | 12 +++---
+ dourmouse/learn.py                      |  2 +-
+ dourmouse/memory_store.py               |  4 +-
+ dourmouse/planner.py                    |  3 ++
+ dourmouse/repo_index.py                 | 11 ++++--
+ dourmouse/system_access.py              | 41 +++++++++++++++++--
+ dourmouse/tests/test_agent_windows.py   |  2 +-
+ dourmouse/tests/test_atlas_cli.py       | 45 +++++++++++++++++----
+ dourmouse/tests/test_chat.py            |  6 +--
+ dourmouse/tests/test_claude_code.py     | 39 ++++++++++++++++++-
+ dourmouse/tests/test_code_backends.py   | 10 +++++
+ dourmouse/tests/test_codex_code.py      | 37 +++++++++++++++++-
+ dourmouse/tests/test_desktop.py         |  6 +--
+ dourmouse/tests/test_general_roster.py  | 19 +++++----
+ dourmouse/tests/test_governance.py      | 18 ++++-----
+ dourmouse/tests/test_key_check.py       |  2 +-
+ dourmouse/tests/test_learn.py           |  2 +-
+ dourmouse/tests/test_live_runtime.py    |  2 +-
+ dourmouse/tests/test_message_bus.py     |  2 +-
+ dourmouse/tests/test_planner.py         |  2 +-
+ dourmouse/tests/test_self_improve.py    |  4 +-
+ dourmouse/tests/test_system_access.py   | 52 ++++++++++++++++++-------
+ dourmouse/tests/test_watch_dourmouse.py |  4 +-
+ dourmouse/webui.py                      | 36 ++++++++++-------
+ 27 files changed, 280 insertions(+), 93 deletions(-)
+
+diff --git a/dourmouse/atlas_cli.py b/dourmouse/atlas_cli.py
+index fc7ee54..f40b48b 100644
+--- a/dourmouse/atlas_cli.py
++++ b/dourmouse/atlas_cli.py
+@@ -130,7 +130,7 @@ def _reports_dir() -> Path:
+ 
+ def _read_report_md(target: Path, snippet_chars: int = _REPORT_SNIPPET_CHARS) -> dict[str, Any]:
+     """One dated report: name, modified iso, full body (capped) + snippet."""
+-    body = target.read_text(errors="replace")
++    body = target.read_text(encoding="utf-8", errors="replace")
+     try:
+         mtime = datetime.fromtimestamp(
+             target.stat().st_mtime, tz=timezone.utc
+diff --git a/dourmouse/atlas_ops.py b/dourmouse/atlas_ops.py
+index 659cceb..bf4f4e4 100644
+--- a/dourmouse/atlas_ops.py
++++ b/dourmouse/atlas_ops.py
+@@ -121,7 +121,7 @@ def atlas_bootstrap_status() -> dict[str, Any]:
+     log_tail = ""
+     if log.is_file():
+         try:
+-            lines = log.read_text(errors="replace").splitlines()
++            lines = log.read_text(encoding="utf-8", errors="replace").splitlines()
+             log_tail = "\n".join(lines[-5:])
+         except OSError:
+             log_tail = "(log unreadable)"
+diff --git a/dourmouse/chat.py b/dourmouse/chat.py
+index cef74bb..39a5eed 100644
+--- a/dourmouse/chat.py
++++ b/dourmouse/chat.py
+@@ -244,7 +244,7 @@ class ChatSession:
+         if not self._state_file.exists():
+             return
+         try:
+-            loaded = json.loads(self._state_file.read_text())
++            loaded = json.loads(self._state_file.read_text(encoding="utf-8"))
+         except (json.JSONDecodeError, OSError) as exc:
+             # Corrupt state must never silently break a session.
+             raise RuntimeError(
+@@ -326,7 +326,7 @@ def _last_record_hash(session_file: Path) -> str | None:
+         return None
+     last_hash: str | None = None
+     try:
+-        for line in session_file.read_text(errors="replace").splitlines():
++        for line in session_file.read_text(encoding="utf-8", errors="replace").splitlines():
+             if not line.strip():
+                 continue
+             rec = json.loads(line)
+@@ -351,7 +351,7 @@ def export_audit(session_file: Path | str, out_path: Path | str) -> tuple[bool,
+     src = Path(session_file)
+     out = Path(out_path)
+     out.parent.mkdir(parents=True, exist_ok=True)
+-    records = [ln for ln in src.read_text(errors="replace").splitlines() if ln.strip()]
++    records = [ln for ln in src.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip()]
+     with out.open("w", encoding="utf-8") as fh:
+         for line in records:
+             fh.write(line + "\n")
+@@ -371,7 +371,7 @@ def verify_session_audit(session_file: Path | str) -> tuple[bool, list[str]]:
+     errors: list[str] = []
+     prev_hash: str | None = None
+     records = 0
+-    for lineno, line in enumerate(path.read_text(errors="replace").splitlines(), 1):
++    for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+         if not line.strip():
+             continue
+         records += 1
+diff --git a/dourmouse/general_roster.py b/dourmouse/general_roster.py
+index 200dee5..2e95508 100644
+--- a/dourmouse/general_roster.py
++++ b/dourmouse/general_roster.py
+@@ -552,7 +552,7 @@ def _read_file_tool(arguments: dict[str, Any]) -> str:
+         return f"REFUSED: {exc}"
+     if not target.is_file():
+         return f"ERROR: no such file in workspace: {arguments.get('path')!r}"
+-    return target.read_text(errors="replace")
++    return target.read_text(encoding="utf-8", errors="replace")
+ 
+ 
+ def _search_files_tool(arguments: dict[str, Any]) -> str:
+@@ -594,7 +594,7 @@ def _search_files_tool(arguments: dict[str, Any]) -> str:
+             if p.is_dir() or p.is_symlink():
+                 continue
+             try:
+-                for i, line in enumerate(p.read_text(errors="replace").splitlines(), 1):
++                for i, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+                     if query in line:
+                         raw += f"{p.relative_to(_workspace_root())}:{i}:{line}\n"
+             except OSError:
+@@ -623,7 +623,7 @@ def _diff_preview_tool(arguments: dict[str, Any], *, for_write: bool = False) ->
+         return f"DIFF (new file): {target.relative_to(_workspace_root())} would be created ({len(new_content)} chars)."
+     if not target.is_file():
+         return f"ERROR: not a file in workspace: {arguments.get('path')!r}"
+-    old = target.read_text(errors="replace").splitlines()
++    old = target.read_text(encoding="utf-8", errors="replace").splitlines()
+     new = new_content.splitlines()
+     diff = "\n".join(
+         difflib.unified_diff(old, new, fromfile=str(target.relative_to(_workspace_root())), tofile=str(target.relative_to(_workspace_root())))
+@@ -672,7 +672,7 @@ def _edit_file_tool(arguments: dict[str, Any]) -> str:
+         return "ERROR: edit_file requires a non-empty 'old_str'."
+     if not target.is_file():
+         return f"ERROR: no such file in workspace: {arguments.get('path')!r}"
+-    text = target.read_text(errors="replace")
++    text = target.read_text(encoding="utf-8", errors="replace")
+     count = text.count(old_str)
+     if count == 0:
+         return f"ERROR: old_str not found in {arguments.get('path')!r} — nothing edited."
+@@ -835,7 +835,7 @@ def _search_vault_tool(arguments: dict[str, Any]) -> str:
+     matches = []
+     for p in sorted(root.rglob("*.md")):
+         try:
+-            text = p.read_text(errors="replace")
++            text = p.read_text(encoding="utf-8", errors="replace")
+         except OSError:
+             continue
+         if query in text.lower():
+@@ -857,7 +857,7 @@ def _read_note_tool(arguments: dict[str, Any]) -> str:
+         return f"REFUSED: {exc}"
+     if not target.is_file():
+         return f"ERROR: no such note in vault: {arguments.get('path')!r}"
+-    return target.read_text(errors="replace")
++    return target.read_text(encoding="utf-8", errors="replace")
+ 
+ 
+ def _write_note_tool(arguments: dict[str, Any]) -> str:
+diff --git a/dourmouse/learn.py b/dourmouse/learn.py
+index c1072ca..d47361a 100644
+--- a/dourmouse/learn.py
++++ b/dourmouse/learn.py
+@@ -168,7 +168,7 @@ def _last_session_record(session_file: Path | str) -> dict[str, Any] | None:
+         return None
+     last: dict[str, Any] | None = None
+     try:
+-        for line in path.read_text(errors="replace").splitlines():
++        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+             if not line.strip():
+                 continue
+             rec = json.loads(line)
+diff --git a/dourmouse/memory_store.py b/dourmouse/memory_store.py
+index 675c532..c326010 100644
+--- a/dourmouse/memory_store.py
++++ b/dourmouse/memory_store.py
+@@ -306,7 +306,7 @@ class MemoryStore:
+         path = Path(path)
+         added = 0
+         try:
+-            lines = path.read_text(errors="replace").splitlines()
++            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+         except OSError:
+             return 0
+         for line in lines:
+@@ -337,7 +337,7 @@ class MemoryStore:
+             return 0
+         for p in sorted(root.rglob("*.md")):
+             try:
+-                body = p.read_text(errors="replace").strip()
++                body = p.read_text(encoding="utf-8", errors="replace").strip()
+             except OSError:
+                 continue
+             if not body:
+diff --git a/dourmouse/planner.py b/dourmouse/planner.py
+index 3665b17..52fbc70 100644
+--- a/dourmouse/planner.py
++++ b/dourmouse/planner.py
+@@ -122,6 +122,9 @@ _DOMAIN_ROUTE: dict[str, str] = {
+     "calendar": "scheduling",
+     "schedule": "scheduling",
+     "meeting": "scheduling",
++    "terminal": "system",  # "run a terminal command" must reach the agent
++    # that owns run_command, never tie-break to a description overlap
++    # (atlas_cmd's "Command Center — run the research pipeline" collides).
+     # NOT here: "web" — too broad. "build a web app" would steal a coding
+     # request to research_info; "search the web" already routes via the
+     # search verb + research_info's web_search tool stem (reviewer-caught).
+diff --git a/dourmouse/repo_index.py b/dourmouse/repo_index.py
+index a3c5d97..2b091f3 100644
+--- a/dourmouse/repo_index.py
++++ b/dourmouse/repo_index.py
+@@ -160,9 +160,9 @@ def _digest_many(path: Path) -> list[tuple[str, str, str]]:
+     suffix = path.suffix.lower()
+     try:
+         if suffix == ".py":
+-            return [("", _python_skeleton(path.read_text(errors="replace"), _MAX_SKELETON), "python")]
++            return [("", _python_skeleton(path.read_text(encoding="utf-8", errors="replace"), _MAX_SKELETON), "python")]
+         if suffix in (".md", ".markdown"):
+-            text = path.read_text(errors="replace").strip()
++            text = path.read_text(encoding="utf-8", errors="replace").strip()
+             if not text:
+                 return []
+             name = path.name.upper()
+@@ -175,7 +175,7 @@ def _digest_many(path: Path) -> list[tuple[str, str, str]]:
+                 return [("", text[:_MAX_MD] + ("…" if len(text) > _MAX_MD else ""), "markdown")]
+             return [("", text[:_MAX_MD] + ("…" if len(text) > _MAX_MD else ""), "markdown")]
+         if suffix in (".json", ".html", ".csv", ".txt", ".yaml", ".yml", ".toml", ".ini", ".cfg"):
+-            text = path.read_text(errors="replace").strip()
++            text = path.read_text(encoding="utf-8", errors="replace").strip()
+             if not text:
+                 return []
+             return [("", text[:_MAX_REPORT] + ("…" if len(text) > _MAX_REPORT else ""), "text")]
+@@ -237,7 +237,10 @@ def scan_repo(
+     walked: set[str] = set()
+     produced_by_rel: dict[str, set[str]] = {}
+     for p in _collect_files(root):
+-        rel = str(p.relative_to(root))
++        # POSIX-normalized relative path: repo facts are shared knowledge that
++        # must look identical on macOS and Windows (a Windows backslash path
++        # would break cross-platform lookups and the PATH= body line).
++        rel = p.relative_to(root).as_posix()
+         walked.add(rel)
+         digests = _digest_many(p)
+         if not digests:
+diff --git a/dourmouse/system_access.py b/dourmouse/system_access.py
+index 7c643bd..29a3238 100644
+--- a/dourmouse/system_access.py
++++ b/dourmouse/system_access.py
+@@ -68,6 +68,13 @@ _SYSTEM_ROOT_PARTS = (
+     "/System",
+     "/Library/Keychains",
+     "/private/etc",
++    # Windows system roots (matched case-insensitively — see _is_sensitive).
++    # Without these the guard silently misses C:\Windows\... on Windows,
++    # which is exactly the credential/system hole this gate exists to close.
++    r"C:\Windows",
++    r"C:\Program Files",
++    r"C:\Program Files (x86)",
++    r"C:\ProgramData",
+ )
+ _SENSITIVE_COMPONENTS = {".ssh", ".aws", ".gnupg", ".kube", ".docker", "Keychains"}
+ 
+@@ -180,10 +187,15 @@ def _is_sensitive(path: Path) -> bool:
+         return True
+     for root in _SYSTEM_ROOT_PARTS:
+         try:
+-            resolved.relative_to(Path(root))
++            if os.name == "nt" and root.startswith("C:"):
++                # Windows paths are case-insensitive; relative_to is not.
++                if str(resolved).lower().startswith(root.lower()):
++                    return True
++            else:
++                resolved.relative_to(Path(root))
++                return True
+         except ValueError:
+             continue
+-        return True
+     return False
+ 
+ 
+@@ -204,7 +216,7 @@ def _read_path_tool(arguments: dict[str, Any]) -> str:
+     if not target.is_file():
+         return f"ERROR: no such file: {target}"
+     try:
+-        return target.read_text(errors="replace")
++        return target.read_text(encoding="utf-8", errors="replace")
+     except OSError as exc:
+         return f"ERROR: could not read {target}: {exc}"
+ 
+@@ -355,11 +367,32 @@ def _system_info_tool(arguments: dict[str, Any]) -> str:
+             ).stdout.strip()
+             if mem.isdigit():
+                 info.append(f"MEMORY: {int(mem) / (1024 ** 3):.1f} GB")
++        elif os.name == "nt":
++            # os.sysconf is POSIX-only; use the GlobalMemoryStatusEx API.
++            import ctypes
++
++            class _MEMORYSTATUSEX(ctypes.Structure):
++                _fields_ = [
++                    ("dwLength", ctypes.c_ulong),
++                    ("dwMemoryLoad", ctypes.c_ulong),
++                    ("ullTotalPhys", ctypes.c_ulonglong),
++                    ("ullAvailPhys", ctypes.c_ulonglong),
++                    ("ullTotalPageFile", ctypes.c_ulonglong),
++                    ("ullAvailPageFile", ctypes.c_ulonglong),
++                    ("ullTotalVirtual", ctypes.c_ulonglong),
++                    ("ullAvailVirtual", ctypes.c_ulonglong),
++                    ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
++                ]
++
++            m = _MEMORYSTATUSEX()
++            m.dwLength = ctypes.sizeof(_MEMORYSTATUSEX)
++            if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m)):
++                info.append(f"MEMORY: {m.ullTotalPhys / (1024 ** 3):.1f} GB")
+         else:
+             mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+             if mem > 0:
+                 info.append(f"MEMORY: {mem / (1024 ** 3):.1f} GB")
+-    except (OSError, ValueError, subprocess.SubprocessError):
++    except (OSError, ValueError, AttributeError, subprocess.SubprocessError):
+         pass
+     try:
+         usage = shutil.disk_usage(Path.home())
+diff --git a/dourmouse/tests/test_agent_windows.py b/dourmouse/tests/test_agent_windows.py
+index 1bfccc5..d0cd07a 100644
+--- a/dourmouse/tests/test_agent_windows.py
++++ b/dourmouse/tests/test_agent_windows.py
+@@ -178,7 +178,7 @@ class TestUiWiring:
+     def _read(self, rel: str) -> str:
+         from pathlib import Path
+ 
+-        return (Path(__file__).resolve().parents[2] / rel).read_text()
++        return (Path(__file__).resolve().parents[2] / rel).read_text(encoding="utf-8")
+ 
+     def test_index_agent_windows_gesture_opens_tab_auto_open_is_bridge_gated(self):
+         html = self._read("ui/index.html")
+diff --git a/dourmouse/tests/test_atlas_cli.py b/dourmouse/tests/test_atlas_cli.py
+index 7588ae3..0752ab1 100644
+--- a/dourmouse/tests/test_atlas_cli.py
++++ b/dourmouse/tests/test_atlas_cli.py
+@@ -32,6 +32,17 @@ from dourmouse.general_roster import build_general_registry
+ 
+ _ECHO_SCRIPT = "#!/usr/bin/env bash\necho \"FAKE_RAN:$*\"\nexit 0\n"
+ _FAIL_SCRIPT = "#!/usr/bin/env bash\necho 'boom on stderr' >&2\nexit 3\n"
++_SLEEP_SCRIPT = "#!/usr/bin/env bash\nsleep 5\n"
++
++# Windows cannot execute POSIX bash scripts. The Windows fake is a REAL
++# interpreter copy plus a REAL atlas.ops.cli module in the fake repo — the
++# exact subprocess path production takes (`python -m atlas.ops.cli`), with
++# the same observable behavior as each POSIX bash fake.
++_FAKE_CLI_MODULE = {
++    _ECHO_SCRIPT: "import sys\nprint('FAKE_RAN:' + ' '.join(sys.argv[1:]))\n",
++    _FAIL_SCRIPT: "import sys\nprint('boom on stderr', file=sys.stderr)\nsys.exit(3)\n",
++    _SLEEP_SCRIPT: "import time\ntime.sleep(5)\n",
++}
+ 
+ 
+ def _fake_atlas(
+@@ -51,11 +62,32 @@ def _fake_atlas(
+     os.utime(repo / "deliverables" / "fx" / "2026-08-06.md", (2_000_000_000, 2_000_000_000))
+     os.utime(repo / "deliverables" / "fx" / "2026-08-05.md", (1_000_000_000, 1_000_000_000))
+     venv = tmp_path / "venv"
+-    bindir = venv / "bin"
+-    bindir.mkdir(parents=True)
+-    py = bindir / "python"
+-    py.write_text(script)
+-    py.chmod(0o755)
++    if os.name == "nt":
++        # Real interpreter copy + real module: bash can't run on Windows.
++        import shutil as _shutil
++        import sys as _sys
++
++        bindir = venv / "Scripts"
++        bindir.mkdir(parents=True)
++        base = Path(_sys._base_executable)
++        _shutil.copyfile(base, bindir / "python.exe")
++        for dll in base.parent.glob("*.dll"):
++            _shutil.copyfile(dll, bindir / dll.name)
++        ops = repo / "atlas" / "ops"
++        ops.mkdir(parents=True)
++        (repo / "atlas" / "__init__.py").write_text("")
++        (ops / "__init__.py").write_text("")
++        (ops / "cli.py").write_text(_FAKE_CLI_MODULE[script])
++        # PYTHONHOME silences "Could not find platform independent
++        # libraries" from a copied interpreter; -m still resolves the fake
++        # module from the repo cwd.
++        monkeypatch.setenv("PYTHONHOME", str(base.parent))
++    else:
++        bindir = venv / "bin"
++        bindir.mkdir(parents=True)
++        py = bindir / "python"
++        py.write_text(script)
++        py.chmod(0o755)
+     monkeypatch.setenv("ATLAS_REPO_PATH", str(repo))
+     monkeypatch.setenv("ATLAS_VENV_PATH", str(venv))
+     return repo
+@@ -94,8 +126,7 @@ class TestRunAtlasCli:
+     def test_timeout_raises_honestly(self, tmp_path, monkeypatch):
+         """subprocess.run raises TimeoutExpired; the tool formats it honestly."""
+         _fake_atlas(
+-            tmp_path, monkeypatch,
+-            script="#!/usr/bin/env bash\nsleep 5\n",
++            tmp_path, monkeypatch, script=_SLEEP_SCRIPT,
+         )
+         with pytest.raises(subprocess.TimeoutExpired):
+             _, _, _ = atlas_cli.run_atlas_cli(["version"], timeout=1)
+diff --git a/dourmouse/tests/test_chat.py b/dourmouse/tests/test_chat.py
+index 3ba935c..3956aa7 100644
+--- a/dourmouse/tests/test_chat.py
++++ b/dourmouse/tests/test_chat.py
+@@ -212,7 +212,7 @@ class TestFailurePaths:
+         assert session._turn_count == 1
+         # The failed turn was still persisted honestly (empty final_text).
+         assert session_file.exists()
+-        record = json.loads(session_file.read_text().strip().splitlines()[0])
++        record = json.loads(session_file.read_text(encoding="utf-8").strip().splitlines()[0])
+         assert record["user"] == "do the thing"
+         assert record["final_text"] == ""
+ 
+@@ -226,11 +226,11 @@ class TestPersistence:
+         session.ask("remember this")
+ 
+         assert session_file.exists()
+-        record = json.loads(session_file.read_text().strip().splitlines()[0])
++        record = json.loads(session_file.read_text(encoding="utf-8").strip().splitlines()[0])
+         assert record["user"] == "remember this"
+         assert record["final_text"] == "Saved."
+         assert session._state_file.exists()
+-        state = json.loads(session._state_file.read_text())
++        state = json.loads(session._state_file.read_text(encoding="utf-8"))
+         assert [m["role"] for m in state] == ["system", "user", "assistant"]
+ 
+     def test_resume_rebuilds_history_from_state(self, tmp_path):
+diff --git a/dourmouse/tests/test_claude_code.py b/dourmouse/tests/test_claude_code.py
+index fde599a..b770e4d 100644
+--- a/dourmouse/tests/test_claude_code.py
++++ b/dourmouse/tests/test_claude_code.py
+@@ -9,6 +9,7 @@ behavior (Rule 2.2 — no silent stub, no fabricated result).
+ 
+ from __future__ import annotations
+ 
++import os
+ import textwrap
+ 
+ import pytest
+@@ -24,13 +25,49 @@ def registry():
+ 
+ 
+ def _write_fake_cli(tmp_path, script: str) -> str:
+-    """Write an executable fake claude CLI; return its path."""
++    """Write an executable fake claude CLI; return its path.
++
++    POSIX: a bash script with the exec bit. Windows: a .cmd shim — bash
++    cannot execute there, and subprocess can launch .cmd files natively.
++    """
++    if os.name == "nt":
++        path = tmp_path / "fake-claude.cmd"
++        path.write_text(_bash_to_cmd(script), encoding="utf-8")
++        return str(path)
+     path = tmp_path / "fake-claude"
+     path.write_text(textwrap.dedent(script))
+     path.chmod(0o755)
+     return str(path)
+ 
+ 
++def _bash_to_cmd(script: str) -> str:
++    """Translate the fixed fake-script shapes into batch equivalents.
++
++    The ARGV/CWD shape is emitted through the real interpreter because cmd's
++    ``%*`` re-quotes args containing spaces (``-p "task"`` instead of
++    ``-p task``) — Python's argv parsing unquotes them faithfully.
++    """
++    import sys as _sys
++
++    s = textwrap.dedent(script)
++    if "ARGV:" in s and "CWD:" in s:
++        script = (
++            "import sys,os; "
++            "print('ARGV: ' + ' '.join(sys.argv[1:])); "
++            "print('CWD: ' + os.getcwd())"
++        )
++        body = ["@echo off", f'"{_sys.executable}" -c "{script}" %*']
++    elif "boom" in s and ">&2" in s:
++        body = ["@echo off", "echo boom 1>&2", "exit /b 3"]
++    elif "sleep" in s:
++        body = ["@echo off", "ping -n 6 127.0.0.1 >nul"]
++    elif "while" in s and "line-" in s:
++        body = ["@echo off", "for /L %%i in (1,1,400) do echo line-%%i-0123456789"]
++    else:
++        body = ["@echo off", "echo ok"]
++    return "\r\n".join(body) + "\r\n"
++
++
+ class TestToolRegistration:
+     def test_claude_code_registered_on_dev_coding(self, registry):
+         sub = registry.get_subagent("dev_coding")
+diff --git a/dourmouse/tests/test_code_backends.py b/dourmouse/tests/test_code_backends.py
+index e41a56e..20cdf6c 100644
+--- a/dourmouse/tests/test_code_backends.py
++++ b/dourmouse/tests/test_code_backends.py
+@@ -8,6 +8,8 @@ binary, the preloaded subagent tool wiring, and the roster shape.
+ 
+ from __future__ import annotations
+ 
++import os
++
+ import pytest
+ 
+ from dourmouse import code_backends
+@@ -232,6 +234,14 @@ class TestRunCodeTask:
+ # --------------------------------------------------------------------------- #
+ 
+ def _write_fake_cli(tmp_path, script: str) -> str:
++    if os.name == "nt":
++        p = tmp_path / "fake-claude.cmd"
++        if ">&2" in script:
++            body = ["@echo off", "echo boom 1>&2", "exit /b 3"]
++        else:
++            body = ["@echo off", 'echo CLAUDE SAYS: print("hello")']
++        p.write_text("\r\n".join(body) + "\r\n", encoding="utf-8")
++        return str(p)
+     p = tmp_path / "fake-claude"
+     p.write_text("#!/bin/bash\n" + script)
+     p.chmod(0o755)
+diff --git a/dourmouse/tests/test_codex_code.py b/dourmouse/tests/test_codex_code.py
+index dcf71b1..971bf8e 100644
+--- a/dourmouse/tests/test_codex_code.py
++++ b/dourmouse/tests/test_codex_code.py
+@@ -9,6 +9,7 @@ NOT CONFIGURED behavior (Rule 2.2 — no silent stub, no fabricated result).
+ 
+ from __future__ import annotations
+ 
++import os
+ import textwrap
+ 
+ import pytest
+@@ -26,13 +27,47 @@ def registry():
+ 
+ 
+ def _write_fake_cli(tmp_path, script: str) -> str:
+-    """Write an executable fake codex CLI; return its path."""
++    """Write an executable fake codex CLI; return its path.
++
++    POSIX: a bash script with the exec bit. Windows: a .cmd shim — bash
++    cannot execute there, and subprocess can launch .cmd files natively.
++    """
++    if os.name == "nt":
++        path = tmp_path / "fake-codex.cmd"
++        path.write_text(_bash_to_cmd(script), encoding="utf-8")
++        return str(path)
+     path = tmp_path / "fake-codex"
+     path.write_text(textwrap.dedent(script))
+     path.chmod(0o755)
+     return str(path)
+ 
+ 
++def _bash_to_cmd(script: str) -> str:
++    """Translate the fixed fake-script shapes into batch equivalents.
++
++    The ARGV/CWD shape is emitted through the real interpreter because cmd's
++    ``%*`` re-quotes args containing spaces (``-p "task"`` instead of
++    ``-p task``) — Python's argv parsing unquotes them faithfully.
++    """
++    import sys as _sys
++
++    s = textwrap.dedent(script)
++    if "ARGV:" in s and "CWD:" in s:
++        script = (
++            "import sys,os; "
++            "print('ARGV: ' + ' '.join(sys.argv[1:])); "
++            "print('CWD: ' + os.getcwd())"
++        )
++        body = ["@echo off", f'"{_sys.executable}" -c "{script}" %*']
++    elif "boom" in s and ">&2" in s:
++        body = ["@echo off", "echo boom 1>&2", "exit /b 3"]
++    elif "sleep" in s:
++        body = ["@echo off", "ping -n 6 127.0.0.1 >nul"]
++    else:
++        body = ["@echo off", "echo ok"]
++    return "\r\n".join(body) + "\r\n"
++
++
+ class TestToolRegistration:
+     def test_codex_code_registered_on_dev_coding(self, registry):
+         sub = registry.get_subagent("dev_coding")
+diff --git a/dourmouse/tests/test_desktop.py b/dourmouse/tests/test_desktop.py
+index 72c5af8..dbe4cbb 100644
+--- a/dourmouse/tests/test_desktop.py
++++ b/dourmouse/tests/test_desktop.py
+@@ -247,14 +247,14 @@ class TestPackaging:
+     def test_desktop_requirements_manifest(self):
+         manifest = _PROJECT_ROOT / "requirements-desktop.txt"
+         assert manifest.is_file()
+-        text = manifest.read_text()
++        text = manifest.read_text(encoding="utf-8")
+         assert "pywebview" in text
+ 
+     def test_start_command_launches_desktop_module(self):
+-        launcher = (_PROJECT_ROOT / "start.command").read_text()
++        launcher = (_PROJECT_ROOT / "start.command").read_text(encoding="utf-8")
+         assert "dourmouse.desktop" in launcher
+         assert "requirements-desktop.txt" in launcher
+ 
+     def test_build_app_command_uses_osacompile(self):
+-        builder = (_PROJECT_ROOT / "build_app.command").read_text()
++        builder = (_PROJECT_ROOT / "build_app.command").read_text(encoding="utf-8")
+         assert "osacompile" in builder
+diff --git a/dourmouse/tests/test_general_roster.py b/dourmouse/tests/test_general_roster.py
+index 4a6c23b..477da3f 100644
+--- a/dourmouse/tests/test_general_roster.py
++++ b/dourmouse/tests/test_general_roster.py
+@@ -85,6 +85,11 @@ class TestRosterShape:
+             "code_claude",
+             "messenger",  # v3.0: inter-agent messaging
+             "atlas",  # v4.0: ATLAS command-centre telemetry
++            "forex",  # v5.x: FX research/archive agents
++            "atlas_cmd",  # v5.x: ATLAS CLI command runner
++            "atlas_ui",  # v5.x: ATLAS UI bridge
++            "mt5",  # v5.x: MetaTrader 5 broker ops
++            "t212",  # v5.x: Trading 212 broker ops
+         }
+ 
+     def test_orchestrator_exposes_delegate_task(self):
+@@ -231,7 +236,7 @@ class TestComms:
+         assert "NOT SENT" in result
+         drafts = list((workspace / "drafts").glob("draft_*.json"))
+         assert len(drafts) == 1
+-        saved = json.loads(drafts[0].read_text())
++        saved = json.loads(drafts[0].read_text(encoding="utf-8"))
+         assert saved["status"] == "draft — NOT SENT"
+         assert saved["to"] == "boss@corp.com"
+ 
+@@ -280,7 +285,7 @@ class TestDevCoding:
+     def test_write_then_read_file_in_workspace(self, workspace):
+         written = _write_file_tool({"path": "src/hello.py", "content": "print('hi')"})
+         assert "WROTE" in written
+-        assert (workspace / "src" / "hello.py").read_text() == "print('hi')"
++        assert (workspace / "src" / "hello.py").read_text(encoding="utf-8") == "print('hi')"
+         read = _read_file_tool({"path": "src/hello.py"})
+         assert read == "print('hi')"
+ 
+@@ -320,7 +325,7 @@ class TestPhase2WorkspaceTools:
+         assert "DIFF PREVIEW" in result
+         assert "-line two" in result
+         assert "+line TWO" in result
+-        assert f.read_text() == "line one\nline two\n", "diff_preview must NOT write"
++        assert f.read_text(encoding="utf-8") == "line one\nline two\n", "diff_preview must NOT write"
+ 
+     def test_diff_preview_new_file(self, workspace):
+         result = _diff_preview_tool({"path": "new.txt", "content": "hi"})
+@@ -341,7 +346,7 @@ class TestPhase2WorkspaceTools:
+         assert "DIFF (what changed in this write):" in result
+         assert "-old value" in result
+         assert "+new value" in result
+-        assert f.read_text() == "new value"
++        assert f.read_text(encoding="utf-8") == "new value"
+ 
+     def test_write_file_new_target_has_no_diff(self, workspace):
+         result = _write_file_tool({"path": "fresh.txt", "content": "x"})
+@@ -355,7 +360,7 @@ class TestPhase2WorkspaceTools:
+         assert "EDITED" in result
+         assert "-print('before')" in result
+         assert "+print('changed')" in result
+-        assert f.read_text() == "print('changed')\nprint('after')\n"
++        assert f.read_text(encoding="utf-8") == "print('changed')\nprint('after')\n"
+ 
+     def test_edit_file_old_str_not_found(self, workspace):
+         (workspace / "x.txt").write_text("hello")
+@@ -369,7 +374,7 @@ class TestPhase2WorkspaceTools:
+         result = _edit_file_tool({"path": "dup.txt", "old_str": "same", "new_str": "other"})
+         assert "2 times" in result
+         assert "refusing" in result
+-        assert f.read_text() == "same\nsame\n", "ambiguous edit must not write"
++        assert f.read_text(encoding="utf-8") == "same\nsame\n", "ambiguous edit must not write"
+ 
+     def test_edit_file_requires_old_str(self, workspace):
+         (workspace / "y.txt").write_text("a")
+@@ -436,7 +441,7 @@ class TestMemory:
+     def test_write_note_creates_real_note(self, vault):
+         result = _write_note_tool({"path": "daily/2026-08-01.md", "content": "# Day\nnotes"})
+         assert "WROTE" in result
+-        assert (vault / "daily" / "2026-08-01.md").read_text() == "# Day\nnotes"
++        assert (vault / "daily" / "2026-08-01.md").read_text(encoding="utf-8") == "# Day\nnotes"
+ 
+     def test_vault_unset_reports_not_configured(self, monkeypatch):
+         monkeypatch.delenv("OBSIDIAN_VAULT_PATH", raising=False)
+diff --git a/dourmouse/tests/test_governance.py b/dourmouse/tests/test_governance.py
+index 839dffa..afefac0 100644
+--- a/dourmouse/tests/test_governance.py
++++ b/dourmouse/tests/test_governance.py
+@@ -747,7 +747,7 @@ class TestAuditLedger:
+ 
+         ok, errors = verify_session_audit(path)
+         assert ok, errors
+-        lines = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
++        lines = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
+         assert len(lines) == 2
+         # Chain: record 2's prev_hash == record 1's hash.
+         assert lines[1]["prev_hash"] == lines[0]["hash"]
+@@ -768,7 +768,7 @@ class TestAuditLedger:
+         )
+         session.ask("one")
+         session.ask("two")
+-        lines = path.read_text().splitlines()
++        lines = path.read_text(encoding="utf-8").splitlines()
+         first = json.loads(lines[0])
+         first["final_text"] = "tampered!"
+         lines[0] = json.dumps(first)
+@@ -788,7 +788,7 @@ class TestAuditLedger:
+         )
+         session.ask("one")
+         session.ask("two")
+-        lines = [l for l in path.read_text().splitlines() if l.strip()]
++        lines = [l for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
+         path.write_text(lines[1] + "\n")  # drop the first record entirely
+         ok, errors = verify_session_audit(path)
+         assert not ok
+@@ -820,7 +820,7 @@ class TestAuditLedger:
+             confirmation_gate=lambda t: True,
+         )
+         session.ask("go")
+-        rec = json.loads(session.session_file.read_text().splitlines()[0])
++        rec = json.loads(session.session_file.read_text(encoding="utf-8").splitlines()[0])
+         assert len(rec["interventions"]) == 2
+         assert rec["interventions"][0]["type"] == "confirmation_requested"
+         assert rec["interventions"][1]["approved"] is True
+@@ -841,7 +841,7 @@ class TestAuditLedger:
+         resumed.ask("two")
+         ok, errors = verify_session_audit(path)
+         assert ok, errors
+-        lines = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
++        lines = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
+         assert lines[1]["prev_hash"] == lines[0]["hash"]
+ 
+ 
+@@ -946,7 +946,7 @@ class TestAuditExport:
+         out = tmp_path / "export" / "ledger.jsonl"
+         ok, errors = export_audit(session.session_file, out)
+         assert ok, errors
+-        assert out.read_text() == session.session_file.read_text()
++        assert out.read_text(encoding="utf-8") == session.session_file.read_text(encoding="utf-8")
+ 
+     def test_export_refuses_tampered_ledger(self, tmp_path, monkeypatch):
+         """A broken chain is never propagated to the compliance export."""
+@@ -955,7 +955,7 @@ class TestAuditExport:
+         session = self._session(tmp_path, monkeypatch)
+         session.ask("one")
+         session.ask("two")
+-        lines = session.session_file.read_text().splitlines()
++        lines = session.session_file.read_text(encoding="utf-8").splitlines()
+         first = json.loads(lines[0])
+         first["final_text"] = "tampered!"
+         lines[0] = json.dumps(first)
+@@ -994,7 +994,7 @@ class TestAuditExport:
+ 
+         session = self._session(tmp_path, monkeypatch)
+         session.ask("one")
+-        lines = session.session_file.read_text().splitlines()
++        lines = session.session_file.read_text(encoding="utf-8").splitlines()
+         first = json.loads(lines[0])
+         first["final_text"] = "tampered!"
+         lines[0] = json.dumps(first)
+@@ -1019,7 +1019,7 @@ class TestAuditExport:
+ 
+         session = self._session(tmp_path, monkeypatch)
+         session.ask("one")
+-        lines = session.session_file.read_text().splitlines()
++        lines = session.session_file.read_text(encoding="utf-8").splitlines()
+         first = json.loads(lines[0])
+         first["final_text"] = "tampered!"
+         lines[0] = json.dumps(first)
+diff --git a/dourmouse/tests/test_key_check.py b/dourmouse/tests/test_key_check.py
+index f364849..e558a80 100644
+--- a/dourmouse/tests/test_key_check.py
++++ b/dourmouse/tests/test_key_check.py
+@@ -322,7 +322,7 @@ class TestCli:
+ 
+ class TestStartCommandWiring:
+     def test_onboarding_runs_live_check_before_writing_env(self):
+-        launcher = (_PROJECT_ROOT / "start.command").read_text()
++        launcher = (_PROJECT_ROOT / "start.command").read_text(encoding="utf-8")
+         # The live check must come BEFORE the .env write, and reject loudly.
+         live_idx = launcher.index("dourmouse.key_check")
+         write_idx = launcher.index("printf 'NVIDIA_API_KEY=")
+diff --git a/dourmouse/tests/test_learn.py b/dourmouse/tests/test_learn.py
+index d1231fd..829e2d6 100644
+--- a/dourmouse/tests/test_learn.py
++++ b/dourmouse/tests/test_learn.py
+@@ -457,7 +457,7 @@ class TestUiWiring:
+     def _read(self, rel: str) -> str:
+         from pathlib import Path
+ 
+-        return (Path(__file__).resolve().parents[2] / rel).read_text()
++        return (Path(__file__).resolve().parents[2] / rel).read_text(encoding="utf-8")
+ 
+     def test_dashboard_shows_memory_line_and_polls_api(self):
+         html = self._read("ui/index.html")
+diff --git a/dourmouse/tests/test_live_runtime.py b/dourmouse/tests/test_live_runtime.py
+index 095a8cd..182b43b 100644
+--- a/dourmouse/tests/test_live_runtime.py
++++ b/dourmouse/tests/test_live_runtime.py
+@@ -383,7 +383,7 @@ class TestUiWiring:
+     def _read(self, rel: str) -> str:
+         from pathlib import Path
+ 
+-        return (Path(__file__).resolve().parents[2] / rel).read_text()
++        return (Path(__file__).resolve().parents[2] / rel).read_text(encoding="utf-8")
+ 
+     def test_agent_window_renders_live(self):
+         html = self._read("ui/agent.html")
+diff --git a/dourmouse/tests/test_message_bus.py b/dourmouse/tests/test_message_bus.py
+index 9724e52..9494956 100644
+--- a/dourmouse/tests/test_message_bus.py
++++ b/dourmouse/tests/test_message_bus.py
+@@ -499,7 +499,7 @@ class TestUiWiring:
+     def _read(self, rel: str) -> str:
+         from pathlib import Path
+ 
+-        return (Path(__file__).resolve().parents[2] / rel).read_text()
++        return (Path(__file__).resolve().parents[2] / rel).read_text(encoding="utf-8")
+ 
+     def test_dashboard_has_comms_panel(self):
+         html = self._read("ui/index.html")
+diff --git a/dourmouse/tests/test_planner.py b/dourmouse/tests/test_planner.py
+index 03edeba..704ef31 100644
+--- a/dourmouse/tests/test_planner.py
++++ b/dourmouse/tests/test_planner.py
+@@ -244,7 +244,7 @@ class TestPlanEventInTranscript:
+         session.ask("Search the web, then draft an email about it", max_turns=2)
+         records = [
+             json.loads(ln)
+-            for ln in session.session_file.read_text().splitlines()
++            for ln in session.session_file.read_text(encoding="utf-8").splitlines()
+             if ln.strip()
+         ]
+         assert records[0]["transcript"][0]["type"] == "plan"
+diff --git a/dourmouse/tests/test_self_improve.py b/dourmouse/tests/test_self_improve.py
+index 0c47608..e9392f1 100644
+--- a/dourmouse/tests/test_self_improve.py
++++ b/dourmouse/tests/test_self_improve.py
+@@ -89,10 +89,10 @@ class TestLiveDigest:
+         assert isinstance(digest["suggestions"], list)
+ 
+     def test_roster_ships_daily_digest_tool(self):
+-        src = (Path(__file__).resolve().parents[2] / "dourmouse" / "general_roster.py").read_text()
++        src = (Path(__file__).resolve().parents[2] / "dourmouse" / "general_roster.py").read_text(encoding="utf-8")
+         assert "daily_digest" in src
+         assert "_build_memory_subagent" in src
+ 
+     def test_webui_ships_selfimprove_route(self):
+-        src = (Path(__file__).resolve().parents[2] / "dourmouse" / "webui.py").read_text()
++        src = (Path(__file__).resolve().parents[2] / "dourmouse" / "webui.py").read_text(encoding="utf-8")
+         assert "/api/selfimprove" in src
+diff --git a/dourmouse/tests/test_system_access.py b/dourmouse/tests/test_system_access.py
+index 6df4a44..400677b 100644
+--- a/dourmouse/tests/test_system_access.py
++++ b/dourmouse/tests/test_system_access.py
+@@ -9,6 +9,8 @@ refusals, and system_info/clipboard/open best-effort paths.
+ from __future__ import annotations
+ 
+ import json
++import os
++import sys
+ 
+ import pytest
+ 
+@@ -27,6 +29,37 @@ from dourmouse.system_access import (
+ )
+ 
+ 
++def _sensitive_paths() -> list[str]:
++    """Platform-appropriate credential/system paths the guard must refuse.
++
++    The guard treats POSIX-style paths as RELATIVE on Windows (no drive
++    root), so hardcoding "/etc/hosts" would trip the absolute-path check
++    with a different message. Use the platform's real shapes instead.
++    """
++    if os.name == "nt":
++        return [
++            r"C:\Windows\System32\drivers\etc\hosts",
++            r"C:\Windows\System32\config\SAM",
++            r"C:\Users\me\.ssh\id_rsa",
++            r"C:\Users\me\.ssh\authorized_keys",
++            r"C:\Users\me\.aws\credentials",
++            r"C:\Users\me\.gnupg\secring.gpg",
++            r"C:\Users\me\.kube\config",
++            r"C:\Users\me\.docker\config.json",
++        ]
++    return [
++        "/etc/hosts",
++        "/usr/local/x",
++        "/Library/Keychains/x",
++        "/Users/me/.ssh/id_rsa",
++        "/Users/me/.ssh/authorized_keys",
++        "/Users/me/.aws/credentials",
++        "/Users/me/.gnupg/secring.gpg",
++        "/Users/me/.kube/config",
++        "/Users/me/.docker/config.json",
++    ]
++
++
+ class _FakeFunction:
+     def __init__(self, name: str, arguments: str):
+         self.name = name
+@@ -135,17 +168,7 @@ class TestReadPathGuard:
+     write/delete — previously it could silently read credentials."""
+ 
+     def test_read_refuses_credential_dir_paths(self):
+-        for p in [
+-            "/etc/hosts",
+-            "/usr/local/x",
+-            "/Library/Keychains/x",
+-            "/Users/me/.ssh/id_rsa",
+-            "/Users/me/.ssh/authorized_keys",
+-            "/Users/me/.aws/credentials",
+-            "/Users/me/.gnupg/secring.gpg",
+-            "/Users/me/.kube/config",
+-            "/Users/me/.docker/config.json",
+-        ]:
++        for p in _sensitive_paths():
+             result = _read_path_tool({"path": p})
+             assert "REFUSED" in result, f"expected refusal for {p}"
+             assert "never reads there" in result
+@@ -222,7 +245,7 @@ class TestFullScopeFiles:
+ 
+         w = tmp_path / "sub" / "new.txt"
+         assert "WROTE" in _write_path_tool({"path": str(w), "content": "abc"})
+-        assert w.read_text() == "abc"
++        assert w.read_text(encoding="utf-8") == "abc"
+ 
+         listing = _list_path_tool({"path": str(tmp_path)})
+         assert "note.txt" in listing and "sub/" in listing
+@@ -232,13 +255,12 @@ class TestFullScopeFiles:
+         assert "ABSOLUTE" in result
+ 
+     def test_write_refuses_sensitive_paths(self):
+-        for p in ["/etc/hosts", "/usr/local/bin/x", "/Library/Keychains/x",
+-                  "/Users/me/.ssh/authorized_keys", "/Users/me/.aws/credentials"]:
++        for p in _sensitive_paths():
+             result = _write_path_tool({"path": p, "content": "x"})
+             assert "REFUSED" in result, f"expected refusal for {p}"
+ 
+     def test_delete_refuses_sensitive_paths(self):
+-        result = _delete_path_tool({"path": "/etc/hosts"})
++        result = _delete_path_tool({"path": _sensitive_paths()[0]})
+         assert "REFUSED" in result
+ 
+     def test_delete_requires_absolute(self):
+diff --git a/dourmouse/tests/test_watch_dourmouse.py b/dourmouse/tests/test_watch_dourmouse.py
+index cba24ab..b876c11 100644
+--- a/dourmouse/tests/test_watch_dourmouse.py
++++ b/dourmouse/tests/test_watch_dourmouse.py
+@@ -90,7 +90,7 @@ class TestLoop:
+         with pytest.raises(SystemExit):
+             w.main()
+         assert sync_called == []  # first run: record only, no sync
+-        assert (tmp_path / "workspace" / "upstream_head.txt").read_text().strip() \
++        assert (tmp_path / "workspace" / "upstream_head.txt").read_text(encoding="utf-8").strip() \
+             == "abc123abc123abc123abc123abc123abc123abc1"
+ 
+     def test_changed_head_triggers_sync_and_notify_once(self, tmp_path, monkeypatch):
+@@ -110,7 +110,7 @@ class TestLoop:
+         with pytest.raises(SystemExit):
+             w.main()
+         assert calls == ["sync", "notify"]  # exactly once each
+-        assert (tmp_path / "workspace" / "upstream_head.txt").read_text().strip() \
++        assert (tmp_path / "workspace" / "upstream_head.txt").read_text(encoding="utf-8").strip() \
+             == "newheadnewheadnewheadnewheadnewheadnewheadnewhead"
+ 
+     def test_unchanged_head_does_nothing(self, tmp_path, monkeypatch):
+diff --git a/dourmouse/webui.py b/dourmouse/webui.py
+index ecd7520..9435e15 100644
+--- a/dourmouse/webui.py
++++ b/dourmouse/webui.py
+@@ -932,18 +932,6 @@ class _Handler(BaseHTTPRequestHandler):
+         parsed = urllib.parse.urlparse(self.path)
+         qs = urllib.parse.parse_qs(parsed.query)
+         name = (qs.get("name") or [""])[0].strip()
+-        if not _UPLOAD_NAME_RE.match(name):
+-            self._send_json(
+-                {
+-                    "ok": False,
+-                    "error": (
+-                        "filename must be 1-120 chars of letters/digits/"
+-                        "dot/underscore/dash (no paths)"
+-                    ),
+-                },
+-                status=400,
+-            )
+-            return
+         raw_len = self.headers.get("Content-Length", "0") or "0"
+         try:
+             length = int(raw_len)
+@@ -956,6 +944,26 @@ class _Handler(BaseHTTPRequestHandler):
+                 status=400,
+             )
+             return
++        if not _UPLOAD_NAME_RE.match(name):
++            # Drain the request body before responding: Windows closes a
++            # socket holding unread received data via RST, so the client
++            # would see a connection reset instead of this 400. Bounded by
++            # the size cap checked above.
++            try:
++                self.rfile.read(length)
++            except OSError:
++                pass
++            self._send_json(
++                {
++                    "ok": False,
++                    "error": (
++                        "filename must be 1-120 chars of letters/digits/"
++                        "dot/underscore/dash (no paths)"
++                    ),
++                },
++                status=400,
++            )
++            return
+         data = self.rfile.read(length) if length else b""
+         if not data:
+             self._send_json({"ok": False, "error": "empty upload body"}, status=400)
+@@ -1574,7 +1582,7 @@ def run_server(
+             first_user = ""
+             last_answer = ""
+             try:
+-                for line in f.read_text(errors="replace").splitlines():
++                for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+                     if not line.strip():
+                         continue
+                     rec = json.loads(line)
+@@ -1590,7 +1598,7 @@ def run_server(
+                     "first_user": first_user[:140],
+                     "last_answer": last_answer[:140],
+                     "turns": f.stat().st_size and sum(
+-                        1 for ln in f.read_text(errors="replace").splitlines() if ln.strip()
++                        1 for ln in f.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip()
+                     ),
+                 }
+             )
+-- 
+2.47.1.windows.1
+
